@@ -1,5 +1,6 @@
 package com.example.kaizenchat.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -34,10 +35,25 @@ public class UserEntity {
 
     private ZonedDateTime registration;
 
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<RoleEntity> roles;
+
+    @JsonIgnore
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "group_chat_members",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "chat_id"))
+    private Set<ChatEntity> groupChats;
+
+    @JsonIgnore
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "duo_chat_members",
+            joinColumns = @JoinColumn(name = "first_user_id"),
+            inverseJoinColumns = @JoinColumn(name = "chat_id"))
+    private Set<ChatEntity> duoChats;
 
 }
