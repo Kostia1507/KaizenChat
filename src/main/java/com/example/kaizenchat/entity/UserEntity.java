@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.ZonedDateTime;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -56,4 +57,16 @@ public class UserEntity {
             inverseJoinColumns = @JoinColumn(name = "chat_id"))
     private Set<ChatEntity> duoChats;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserEntity user = (UserEntity) o;
+        return Objects.equals(id, user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }
