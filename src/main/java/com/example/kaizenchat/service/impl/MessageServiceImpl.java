@@ -12,7 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -20,9 +22,9 @@ import java.util.Set;
 @Service
 public class MessageServiceImpl implements MessageService {
 
-    MessageRepository messageRepository;
-    ChatRepository chatRepository;
-    UserRepository userRepository;
+    private final MessageRepository messageRepository;
+    private final ChatRepository chatRepository;
+    private final UserRepository userRepository;
 
     @Autowired
     public MessageServiceImpl(MessageRepository messageRepository, ChatRepository chatRepository,
@@ -66,4 +68,11 @@ public class MessageServiceImpl implements MessageService {
         }else throw new UserViolationPermissionsException();
     }
 
+    public List<MessageEntity> getLastMessages(Long chatId, ZonedDateTime time, int limit){
+        return messageRepository.findLastNMessagesBefore(chatId, time, limit);
+    }
+
+    public List<MessageEntity> getLastMessages(Long chatId, int limit){
+        return messageRepository.findLastNMessagesBefore(chatId, ZonedDateTime.now(), limit);
+    }
 }
