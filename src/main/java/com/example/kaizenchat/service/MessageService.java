@@ -1,9 +1,7 @@
 package com.example.kaizenchat.service;
 
 import com.example.kaizenchat.entity.MessageEntity;
-import com.example.kaizenchat.exception.ChatNotFoundException;
-import com.example.kaizenchat.exception.UserNotFoundException;
-import com.example.kaizenchat.exception.UserNotFoundInChatException;
+import com.example.kaizenchat.exception.*;
 
 import java.util.Optional;
 
@@ -13,4 +11,7 @@ public interface MessageService {
 
     void createNewMessage(Long chatId, Long senderId, String body)
             throws UserNotFoundException, ChatNotFoundException, UserNotFoundInChatException;
+
+    void editMessage(Long senderId, Long messageId, String body)
+            throws UserNotFoundException, MessageNotFoundException, UserViolationPermissionsException;
 }

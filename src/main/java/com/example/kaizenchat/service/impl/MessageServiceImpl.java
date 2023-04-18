@@ -3,9 +3,7 @@ package com.example.kaizenchat.service.impl;
 import com.example.kaizenchat.entity.ChatEntity;
 import com.example.kaizenchat.entity.MessageEntity;
 import com.example.kaizenchat.entity.UserEntity;
-import com.example.kaizenchat.exception.ChatNotFoundException;
-import com.example.kaizenchat.exception.UserNotFoundException;
-import com.example.kaizenchat.exception.UserNotFoundInChatException;
+import com.example.kaizenchat.exception.*;
 import com.example.kaizenchat.repository.ChatRepository;
 import com.example.kaizenchat.repository.MessageRepository;
 import com.example.kaizenchat.repository.UserRepository;
@@ -55,6 +53,17 @@ public class MessageServiceImpl implements MessageService {
             );
         }else
             throw new UserNotFoundInChatException();
+    }
+
+    public void editMessage(Long senderId, Long messageId, String body)
+            throws UserNotFoundException, MessageNotFoundException, UserViolationPermissionsException {
+        UserEntity user = userRepository.findById(senderId).orElseThrow(UserNotFoundException::new);
+        MessageEntity message = messageRepository.findById(messageId).orElseThrow(MessageNotFoundException::new);
+
+        if(message.getSender().equals(user)){
+            message.setBody(body);
+            messageRepository.save(message);
+        }else throw new UserViolationPermissionsException();
     }
 
 }
