@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.ZonedDateTime;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -41,6 +42,23 @@ public class ChatEntity {
 
     public Set<UserEntity> getUsers() {
         return groupChatUsers.isEmpty() ? duoChatUsers : groupChatUsers;
+    }
+
+    public boolean isGroupChat() {
+        return !groupChatUsers.isEmpty();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChatEntity chat = (ChatEntity) o;
+        return Objects.equals(id, chat.id) && Objects.equals(name, chat.name) && Objects.equals(creation, chat.creation);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, creation);
     }
 
 }
