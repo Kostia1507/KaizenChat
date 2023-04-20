@@ -5,6 +5,7 @@ import com.example.kaizenchat.dto.UserRegistrationRequest;
 import com.example.kaizenchat.entity.RoleEntity;
 import com.example.kaizenchat.entity.UserEntity;
 import com.example.kaizenchat.exception.InvalidRequestDataException;
+import com.example.kaizenchat.exception.UserNotFoundException;
 import com.example.kaizenchat.repository.RoleRepository;
 import com.example.kaizenchat.repository.UserRepository;
 import com.example.kaizenchat.security.jwt.JWTProvider;
@@ -43,6 +44,11 @@ public class UserServiceImpl implements UserService {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+    }
+
+    @Override
+    public UserEntity findUserById(Long id) throws UserNotFoundException {
+        return userRepository.findById(id).orElseThrow(UserNotFoundException::new);
     }
 
     @Override
