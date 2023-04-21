@@ -8,9 +8,9 @@
 
 ## Registration
 
-**Path:** `http://localhost:8080/register`
+**Path:** `http://localhost:8080/auth/register`
 
-**Method:** Post
+**Method:** POST
 
 **Format:** JSON
 
@@ -50,9 +50,9 @@
 
 ## Login
 
-**Path:** `http://localhost:8080/login`
+**Path:** `http://localhost:8080/auth/login`
 
-**Method:** Post
+**Method:** POST
 
 **Format:** JSON
 
@@ -91,9 +91,9 @@
 
 ## Refresh token
 
-**Path:** `http://localhost:8080/refresh`
+**Path:** `http://localhost:8080/auth/refresh`
 
-**Method:** Post
+**Method:** POST
 
 **Format:** JSON
 
@@ -123,5 +123,118 @@
 ```json
 {
     "message": "wrong refresh token"
+}
+```
+
+---
+
+## User information
+
+**Path:** `http://localhost:8080/user/id/{id}`
+
+**Method:** GET
+
+**Responses:**
+
+- 200:
+
+```json
+{
+  "user": {
+    "id": 3,
+    "phoneNumber": "...",
+    "nickname": "...",
+    "avatar": "...",
+    "bio": null,
+    "registration": "2023-04-21T21:23:54.455804+03:00"
+  }
+}
+```
+
+- 404:
+
+```json
+{
+  "user": {
+    "id": null,
+    "phoneNumber": null,
+    "nickname": null,
+    "avatar": null,
+    "bio": null,
+    "registration": null
+  }
+}
+```
+<br/>
+
+**Path:** `http://localhost:8080/user/phone/{phoneNumber}`
+
+**Method:** GET
+
+**Responses:**
+
+- 200:
+
+```json
+{
+  "user": {
+    "id": 3,
+    "phoneNumber": "...",
+    "nickname": "...",
+    "avatar": "...",
+    "bio": null,
+    "registration": "2023-04-21T21:23:54.455804+03:00"
+  }
+}
+```
+
+- 404:
+
+```json
+{
+  "user": {
+    "id": null,
+    "phoneNumber": null,
+    "nickname": null,
+    "avatar": null,
+    "bio": null,
+    "registration": null
+  }
+}
+```
+<br/>
+
+**Path:** `http://localhost:8080/user/update`
+
+**Method:** POST
+
+**Format:** JSON
+
+**Body:**
+
+```json
+{
+  "id":1,
+  "nickname":"...",
+  "avatar":"...",
+  "bio":"..."
+}
+```
+
+**Responses:**
+
+- 200:
+
+```json
+{
+  "message": "user updated"
+}
+```
+
+- 403:
+
+```json
+{
+  "message": "wrong id"
 }
 ```
