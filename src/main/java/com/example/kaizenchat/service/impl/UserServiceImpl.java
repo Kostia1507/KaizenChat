@@ -51,6 +51,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(id).orElseThrow(UserNotFoundException::new);
     }
 
+    @Override
     public UserEntity findUserByPhoneNumber(String phoneNumber) throws UserNotFoundException {
         return userRepository.findByPhoneNumber(phoneNumber).orElseThrow(UserNotFoundException::new);
     }
@@ -117,11 +118,12 @@ public class UserServiceImpl implements UserService {
         return tokens;
     }
 
+    @Override
     public void updateUser(Long userId, String nickname, String avatar, String bio) throws UserNotFoundException{
         UserEntity user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
-        user.setNickname(nickname);
-        user.setAvatar(avatar);
-        user.setBio(bio);
+        user.setNickname(nickname != null ? nickname : user.getNickname());
+        user.setAvatar(avatar != null ? avatar : user.getAvatar());
+        user.setBio(bio != null ? bio : user.getBio());
         userRepository.save(user);
     }
 
