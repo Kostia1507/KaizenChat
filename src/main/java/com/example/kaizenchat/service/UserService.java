@@ -12,9 +12,13 @@ public interface UserService {
 
     UserEntity findUserById(Long id) throws UserNotFoundException;
 
+    UserEntity findUserByPhoneNumber(String phoneNumber) throws UserNotFoundException;
+
     Map<String, String> register(UserRegistrationRequest request);
 
     Map<String, String> login(UserLoginRequest request) throws InvalidRequestDataException;
 
     Map<String, String> refreshTokens(String refreshToken) throws InvalidRequestDataException;
+
+    void updateUser(Long userId, String nickname, String avatar, String bio) throws UserNotFoundException;
 }

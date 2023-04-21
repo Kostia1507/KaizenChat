@@ -51,6 +51,10 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(id).orElseThrow(UserNotFoundException::new);
     }
 
+    public UserEntity findUserByPhoneNumber(String phoneNumber) throws UserNotFoundException {
+        return userRepository.findByPhoneNumber(phoneNumber).orElseThrow(UserNotFoundException::new);
+    }
+
     @Override
     public Map<String, String> refreshTokens(String oldRefreshToken) throws InvalidRequestDataException {
         log.info("IN UserService -> refreshTokens()");
@@ -111,6 +115,14 @@ public class UserServiceImpl implements UserService {
         user.setRefreshToken(tokens.get("refreshToken"));
         userRepository.save(user);
         return tokens;
+    }
+
+    public void updateUser(Long userId, String nickname, String avatar, String bio) throws UserNotFoundException{
+        UserEntity user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+        user.setNickname(nickname);
+        user.setAvatar(avatar);
+        user.setBio(bio);
+        userRepository.save(user);
     }
 
     private Map<String, String> generatesTokens(String nickname, String phoneNumber) {
