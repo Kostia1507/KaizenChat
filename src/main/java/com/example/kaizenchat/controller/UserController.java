@@ -1,6 +1,5 @@
 package com.example.kaizenchat.controller;
 
-import com.example.kaizenchat.dto.UserRegistrationRequest;
 import com.example.kaizenchat.dto.UserUpdateRequest;
 import com.example.kaizenchat.entity.UserEntity;
 import com.example.kaizenchat.exception.UserNotFoundException;
@@ -19,7 +18,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @RequestMapping("/user")
 public class UserController {
 
-    UserService userService;
+    private final UserService userService;
 
     @Autowired
     public UserController(UserService userService) {

@@ -11,7 +11,6 @@ import lombok.ToString;
 @ToString
 public class UserUpdateRequest {
     private Long id;
-    private String password;
     private String nickname;
     private String avatar;
     private String bio;

@@ -23,8 +23,10 @@ public class UserEntity {
     @Column(name = "phone_number")
     private String phoneNumber;
 
+    @JsonIgnore
     private String password;
 
+    @JsonIgnore
     @Column(name = "refresh_token")
     private String refreshToken;
 
