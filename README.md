@@ -18,23 +18,23 @@
 
 ```json
 {
-    "phoneNumber":"...",
-    "nickname":"...",
-    "userPhoto":"...",
-    "password":"..."
+  "phoneNumber":"...",
+  "nickname":"...",
+  "userPhoto":"...",
+  "password":"..."
 }
 ```
 
 **Responses:**
 
 - 200:
-  
+
 ```json
 {
-    "accessToken": "...",
-    "accessTokenExpiration": "2023-04-14T23:40:02+03:00",
-    "refreshTokenExpiration": "2023-05-14T23:10:02+03:00",
-    "refreshToken": "..."
+  "accessToken": "...",
+  "accessTokenExpiration": "2023-04-14T23:40:02+03:00",
+  "refreshTokenExpiration": "2023-05-14T23:10:02+03:00",
+  "refreshToken": "..."
 }
 ```
 
@@ -42,7 +42,7 @@
 
 ```json
 {
-    "message": "invalid request"
+  "message": "invalid request"
 }
 ```
 
@@ -60,8 +60,8 @@
 
 ```json
 {
-    "phoneNumber": "...",
-    "password": "..."
+  "phoneNumber": "...",
+  "password": "..."
 }
 ```
 
@@ -71,11 +71,11 @@
 
 ```json
 {
-    "isRegistered": "true",
-    "accessToken": "...",
-    "accessTokenExpiration": "2023-04-14T23:40:02+03:00",
-    "refreshTokenExpiration": "2023-05-14T23:10:02+03:00",
-    "refreshToken": "..."
+  "isRegistered": "true",
+  "accessToken": "...",
+  "accessTokenExpiration": "2023-04-14T23:40:02+03:00",
+  "refreshTokenExpiration": "2023-05-14T23:10:02+03:00",
+  "refreshToken": "..."
 }
 ```
 
@@ -83,7 +83,7 @@
 
 ```json
 {
-    "isRegistered": "false"
+  "isRegistered": "false"
 }
 ```
 
@@ -101,7 +101,7 @@
 
 ```json
 {
-    "oldRefreshToken": "..."
+  "oldRefreshToken": "..."
 }
 ```
 
@@ -111,10 +111,10 @@
 
 ```json
 {
-    "accessToken": "...",
-    "accessTokenExpiration": "2023-04-14T23:40:02+03:00",
-    "refreshTokenExpiration": "2023-05-14T23:10:02+03:00",
-    "refreshToken": "..."
+  "accessToken": "...",
+  "accessTokenExpiration": "2023-04-14T23:40:02+03:00",
+  "refreshTokenExpiration": "2023-05-14T23:10:02+03:00",
+  "refreshToken": "..."
 }
 ```
 
@@ -122,7 +122,7 @@
 
 ```json
 {
-    "message": "wrong refresh token"
+  "message": "wrong refresh token"
 }
 ```
 
@@ -216,7 +216,6 @@
 {
   "id":1,
   "nickname":"...",
-  "avatar":"...",
   "bio":"..."
 }
 ```
@@ -238,3 +237,81 @@
   "message": "wrong id"
 }
 ```
+
+<br/>
+
+**Path:** `http://localhost:8080/user/upload-avatar`
+
+**Method:** POST
+
+**Format:** form-data
+
+**Body:**
+
+```
+key: "avatar"
+value: image (jpeg, jpg, png, up to 3 megabytes)
+```
+
+**Responses:**
+
+- 200:
+
+```json
+{
+    "message": "updated"
+}
+```
+
+- 400:
+
+```json
+{
+    "message": "file is not present"
+}
+```
+
+```json
+{
+    "message": "file size is greater than 3MB"
+}
+```
+
+```json
+{
+    "message": "uploaded file is not an image"
+}
+```
+
+- 403:
+
+```json
+{
+    "message": "user is not defined"
+}
+```
+
+<br/>
+
+**Path:** `http://localhost:8080/user/{userId}/download-avatar`
+
+**Method:** GET
+
+**Format:** form-data
+
+**Body:**
+
+```
+key: "avatar"
+value: image (jpeg, jpg, png, up to 3 megabytes)
+```
+
+**Responses:**
+
+- 200:
+
+```
+[image]
+```
+
+- 404
