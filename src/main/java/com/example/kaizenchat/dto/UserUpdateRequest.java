@@ -12,6 +12,5 @@ import lombok.ToString;
 public class UserUpdateRequest {
     private Long id;
     private String nickname;
-    private String avatar;
     private String bio;
 }

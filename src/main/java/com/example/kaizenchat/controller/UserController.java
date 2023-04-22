@@ -48,7 +48,7 @@ public class UserController {
     @PostMapping(path = "/update")
     public ResponseEntity<Map<String, String>> updateUser(@RequestBody UserUpdateRequest request) {
         try {
-            userService.updateUser(request.getId(), request.getNickname(), request.getAvatar(), request.getBio());
+            userService.updateUser(request.getId(), request.getNickname(), null, request.getBio());
             return ResponseEntity.ok().body(Map.of("message","user updated"));
         } catch (UserNotFoundException e) {
             return ResponseEntity.status(NOT_FOUND).body(Map.of("message","wrong id"));
