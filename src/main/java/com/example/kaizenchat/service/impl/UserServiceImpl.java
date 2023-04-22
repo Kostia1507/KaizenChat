@@ -4,19 +4,27 @@ import com.example.kaizenchat.dto.UserLoginRequest;
 import com.example.kaizenchat.dto.UserRegistrationRequest;
 import com.example.kaizenchat.entity.RoleEntity;
 import com.example.kaizenchat.entity.UserEntity;
+import com.example.kaizenchat.exception.AvatarNotExistsException;
 import com.example.kaizenchat.exception.InvalidRequestDataException;
 import com.example.kaizenchat.exception.UserNotFoundException;
+import com.example.kaizenchat.model.Avatar;
 import com.example.kaizenchat.repository.RoleRepository;
 import com.example.kaizenchat.repository.UserRepository;
 import com.example.kaizenchat.security.jwt.JWTProvider;
 import com.example.kaizenchat.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Map;
@@ -24,6 +32,7 @@ import java.util.Set;
 
 import static com.example.kaizenchat.security.jwt.JWTType.ACCESS;
 import static com.example.kaizenchat.security.jwt.JWTType.REFRESH;
+import static com.example.kaizenchat.utils.MultipartFileUtils.getFileExtension;
 
 @Slf4j
 @Service
@@ -125,6 +134,48 @@ public class UserServiceImpl implements UserService {
         user.setAvatar(avatar != null ? avatar : user.getAvatar());
         user.setBio(bio != null ? bio : user.getBio());
         userRepository.save(user);
+    }
+
+    @Override
+    public boolean updateAvatar(MultipartFile avatar, Long userId) {
+        log.info("IN UserService -> updateAvatar()");
+
+        String filename = String.format("img-%d_%d.%s",
+                userId, Instant.now().toEpochMilli(), getFileExtension(avatar));
+
+        Path destination = getImageDestination(filename);
+
+        try {
+            avatar.transferTo(destination);
+            updateUser(userId, null, destination.toString(), null);
+            return true;
+        } catch (IOException | UserNotFoundException e) {
+            log.error("IN UserService -> updateAvatar(): {}", e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public Avatar downloadAvatar(Long userId) throws UserNotFoundException, AvatarNotExistsException {
+        log.info("IN UserService -> downloadAvatar()");
+        UserEntity user = findUserById(userId);
+        try {
+            Path path = Path.of(user.getAvatar());
+            String pathString = path.toString();
+
+            String ext = pathString.substring(pathString.lastIndexOf(".") + 1);
+            MediaType type = MediaType.valueOf("images/" + ext);
+            byte[] bytes = Files.readAllBytes(path);
+
+            return new Avatar(pathString, type, bytes);
+        } catch (IOException e) {
+            log.error("IN UserService -> downloadAvatar(): {}", e.getMessage());
+            throw new AvatarNotExistsException(e);
+        }
+    }
+
+    private Path getImageDestination(String filename) {
+        return Path.of("src", "main", "resources", "images", filename);
     }
 
     private Map<String, String> generatesTokens(String nickname, String phoneNumber) {
