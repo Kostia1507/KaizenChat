@@ -8,6 +8,8 @@
 
 ## Registration
 
+<details>
+
 **Path:** `http://localhost:8080/auth/register`
 
 **Method:** POST
@@ -46,9 +48,13 @@
 }
 ```
 
+</details>
+
 ---
 
 ## Login
+
+<details>
 
 **Path:** `http://localhost:8080/auth/login`
 
@@ -87,9 +93,13 @@
 }
 ```
 
+</details>
+
 ---
 
 ## Refresh token
+
+<details>
 
 **Path:** `http://localhost:8080/auth/refresh`
 
@@ -126,9 +136,13 @@
 }
 ```
 
+</details>
+
 ---
 
 ## User information
+
+<details>
 
 **Path:** `http://localhost:8080/user/id/{id}`
 
@@ -315,3 +329,5 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 ```
 
 - 404
+
+</details>
