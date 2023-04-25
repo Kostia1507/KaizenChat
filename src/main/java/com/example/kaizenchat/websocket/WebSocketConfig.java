@@ -58,7 +58,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 log.info("IN ChannelInterceptor -> preSend(): message-type: {}", commandType);
 
                 // just pass through without jwt verifying when it's disconnection or subscription
-                if (commandType.equals(DISCONNECT.name()) || commandType.equals(SUBSCRIBE.name())) {
+                if (commandType.equals(DISCONNECT.name())) {
                     return message;
                 }
 

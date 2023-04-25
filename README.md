@@ -365,6 +365,8 @@ When Stomp client is created over web-socket he has to connect to the server wit
 
 **WS Client:** StompJS
 
+**Headers:** `Authorization: bearer (jwt)`
+
 **Description:** this end-point is used to subscribe only on group chats.
 
 </details>
