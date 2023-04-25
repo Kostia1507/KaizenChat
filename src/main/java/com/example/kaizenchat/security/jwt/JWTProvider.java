@@ -88,6 +88,10 @@ public class JWTProvider {
 
     public String getToken(HttpServletRequest request) {
         String bearer = request.getHeader("Authorization");
+        return getToken(bearer);
+    }
+
+    public String getToken(String bearer) {
         return bearer == null || bearer.length() < 7 ? null : bearer.substring(7);
     }
 
