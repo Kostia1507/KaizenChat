@@ -6,6 +6,8 @@
 
 ---
 
+<br/>
+
 - ## REST
 
 ## Registration
@@ -335,6 +337,8 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 </details>
 
 ---
+
+<br/>
 
 - ## Web Sockets
 
