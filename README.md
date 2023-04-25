@@ -375,6 +375,8 @@ When Stomp client is created over web-socket he has to connect to the server wit
 
 <details>
 
+### Join to chat
+
 **Path:** `/app/join`
 
 **WS Client:** StompJS
@@ -408,11 +410,9 @@ When Stomp client is created over web-socket he has to connect to the server wit
 }
 ```
 
-</details>
-
 ---
 
-<details>
+### Quit from chat
 
 **Path:** `/app/quit/{chat-id}`
 
@@ -436,11 +436,9 @@ When Stomp client is created over web-socket he has to connect to the server wit
 }
 ```
 
-</details>
-
 ---
 
-<details>
+### Send message to chat
 
 **Path:** `/app/send`
 
