@@ -6,6 +6,8 @@
 
 ---
 
+- ## REST
+
 ## Registration
 
 <details>
@@ -329,5 +331,143 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 ```
 
 - 404
+
+</details>
+
+---
+
+- ## Web Sockets
+
+## Connection
+
+<details>
+
+**Path:** `http://localhost:8080/ws-open`
+
+**Description:** this end-point establishes real-time connection between client and server. For that purpose client must use SockJS and StompJS client.
+
+When Stomp client is created over web-socket he has to connect to the server with such header:
+`Authorization: bearer (jwt)`. When successfully connected (via switching protocols) to the server, client can subscribe on channels and send messages as he needs.
+
+</details>
+
+---
+
+## Subscription
+
+<details>
+
+**Path:** `/chatroom/{chat-id}`
+
+**WS Client:** StompJS
+
+**Description:** this end-point is used to subscribe only on group chats.
+
+</details>
+
+---
+
+## Group chats
+
+<details>
+
+**Path:** `/app/join`
+
+**WS Client:** StompJS
+
+**Body format:** JSON
+
+**Headers:** `Authorization: bearer (jwt)`
+
+**Body:**
+
+```json
+{
+  "chatId": 1,
+  "privacyMode": true,
+  "password": "password, if privacy mode is true"
+}
+```
+
+**Responses:**
+
+- Status: `MESSAGE`
+
+```json
+{
+  "action": "JOIN",
+  "body": "bie3 joined to the chat",
+  "chatId": 4,
+  "senderId": 2,
+  "senderNickname": "bie3",
+  "timeStamp": "2023-04-25T10:36:34.2459185+03:00"
+}
+```
+
+</details>
+
+---
+
+<details>
+
+**Path:** `/app/quit/{chat-id}`
+
+**WS Client:** StompJS
+
+**Headers:** `Authorization: bearer (jwt)`
+
+
+**Responses:**
+
+- Status: `MESSAGE`
+
+```json
+{
+  "action": "QUIT",
+  "body": "bie3 left the chat",
+  "chatId": 4,
+  "senderId": 2,
+  "senderNickname": "bie3",
+  "timeStamp": "2023-04-25T10:36:34.2459185+03:00"
+}
+```
+
+</details>
+
+---
+
+<details>
+
+**Path:** `/app/send`
+
+**WS Client:** StompJS
+
+**Body format:** JSON
+
+**Headers:** `Authorization: bearer (jwt)`
+
+**Body:**
+
+```json
+{
+  "chatId": 4,
+  "body": "hello world"
+}
+```
+
+**Responses:**
+
+- Status: `MESSAGE`
+
+```json
+{
+  "action": "SEND",
+  "body": "hello world",
+  "chatId": 4,
+  "senderId": 2,
+  "senderNickname": "bie3",
+  "timeStamp": "2023-04-25T10:42:09.4639461+03:00"
+}
+```
 
 </details>
