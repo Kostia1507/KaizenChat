@@ -26,7 +26,7 @@ public interface ChatService {
 
     GroupChat createGroupChat(GroupChatCreationRequest request, Long userId) throws UserNotFoundException;
 
-    void addUserToGroupChat(AddMemberToChatRequest request, Long userId)
+    boolean addUserToGroupChat(AddMemberToChatRequest request, Long userId)
             throws ChatNotFoundException, UserNotFoundException, UserViolationPermissionsException;
 
     boolean isMemberInGroupChat(UserEntity user, ChatEntity chat);
@@ -35,5 +35,7 @@ public interface ChatService {
 
     void kickFromGroupChat(UserEntity admin, ChatEntity chat, UserEntity user)
             throws UserViolationPermissionsException;
+
+    void deleteUser(ChatEntity chat, UserEntity user);
 
 }

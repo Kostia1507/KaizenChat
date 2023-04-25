@@ -142,7 +142,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public void addUserToGroupChat(AddMemberToChatRequest request, Long userId)
+    public boolean addUserToGroupChat(AddMemberToChatRequest request, Long userId)
             throws ChatNotFoundException, UserNotFoundException, UserViolationPermissionsException {
 
         log.info("IN ChatService -> addUserToGroupChat(): chat-id:{} user-id:{}", request.getChatId(), userId);
@@ -169,12 +169,13 @@ public class ChatServiceImpl implements ChatService {
 
         if (isMemberInGroupChat(user, chat)) {
             log.info("IN ChatService -> addUserToGroupChat(): user-id:{} already in chat-id:{}", userId, request.getChatId());
-            return;
+            return false;
         }
         // save user to chat
         chatRepository.addUserToGroupChat(chat.getId(), userId);
         groupChatOptions.setMembersCount(membersCount + 1);
         groupChatOptionsRepository.save(groupChatOptions);
+        return true;
     }
 
     @Override
@@ -197,6 +198,7 @@ public class ChatServiceImpl implements ChatService {
             throws UserViolationPermissionsException {
 
         log.info("IN ChatService -> kickFromGroupChat(): chat-id:{} user-id:{}", chat.getId(), user.getId());
+
         if (!isUserAdminInGroupChat(admin, chat)) {
             String message = format("user-id:%d is not admin in chat-id:%d", admin.getId(), chat.getId());
             log.error("IN ChatService -> kickFromGroupChat(): {}", message);
@@ -204,6 +206,12 @@ public class ChatServiceImpl implements ChatService {
         }
 
         // save changes
+        deleteUser(chat, user);
+    }
+
+    @Override
+    public void deleteUser(ChatEntity chat, UserEntity user) {
+        log.info("IN ChatService -> deleteUser(): chat-id:{} user-id:{}", chat.getId(), user.getId());
         chat.getUsers().remove(user);
         var chatOptions = chat.getGroupChatOptions();
         chatOptions.setMembersCount(chatOptions.getMembersCount() - 1);
