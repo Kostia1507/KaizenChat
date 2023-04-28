@@ -24,7 +24,7 @@ import static com.example.kaizenchat.model.ChatType.DUO;
 
 @Slf4j
 @RestController
-@RequestMapping("/private-chats")
+@RequestMapping("/duo-chats")
 public class DuoChatController {
 
     private final SimpMessagingTemplate template;
