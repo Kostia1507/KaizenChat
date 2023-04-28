@@ -148,13 +148,13 @@ public class GroupChatController {
                 .getPrincipal();
 
         Long userId = userDetails.getId();
-        log.info("ChatController ->  getAllChats(): user-id={}", userId);
+        log.info("GroupChatController ->  getAllChats(): user-id={}", userId);
 
         try {
             List<Chat> chats = chatService.getAllChats(userId, GROUP);
             return ResponseEntity.ok(chats);
         } catch (UserNotFoundException e) {
-            log.error("ChatController ->  getAllChats(): {}", e.getMessage());
+            log.error("GroupChatController ->  getAllChats(): {}", e.getMessage());
             return ResponseEntity
                     .status(HttpStatus.FORBIDDEN)
                     .body(Map.of("message", "user is not found"));
