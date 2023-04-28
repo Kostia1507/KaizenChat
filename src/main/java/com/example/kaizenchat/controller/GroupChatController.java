@@ -40,7 +40,7 @@ import static java.time.ZonedDateTime.now;
 
 @Slf4j
 @RestController
-@RequestMapping("/group-chats")
+@RequestMapping("/user/group-chats")
 public class GroupChatController {
 
     private final SimpMessagingTemplate template;
