@@ -334,6 +334,45 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 
 - 404
 
+<br/>
+
+**Path:** `http://localhost:8080/user/group-chats/all`
+
+**Method:** GET
+
+**Authorization header format:** `Bearer [access token]`
+
+**Responses:**
+
+- 200:
+
+```json
+[
+    {
+        "id": 5,
+        "userId": 2,
+        "username": "bie3",
+        "lastMessage": "yooo",
+        "lastMessageTime": "2023-04-28T14:20:26.983+03:00"
+    },
+    {
+        "id": 4,
+        "userId": 2,
+        "username": "bie3",
+        "lastMessage": "hello world",
+        "lastMessageTime": "2023-04-25T10:42:09.449007+03:00"
+    }
+]
+```
+
+- 403:
+
+```json
+{
+  "message": "user is not found"
+}
+```
+
 </details>
 
 ---
