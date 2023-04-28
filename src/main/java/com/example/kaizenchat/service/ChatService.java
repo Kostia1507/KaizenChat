@@ -20,6 +20,8 @@ public interface ChatService {
 
     ChatEntity findChatById(Long id, ChatType type) throws ChatNotFoundException;
 
+    ChatEntity findChatByUsers(Long firstUserId,Long secondUserId) throws ChatNotFoundException, UserNotFoundException;
+
     void deleteGroupChatById(Long id) throws ChatNotFoundException;
 
     void deleteDuoChatById(Long id) throws ChatNotFoundException;

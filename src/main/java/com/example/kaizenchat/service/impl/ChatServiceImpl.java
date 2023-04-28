@@ -83,6 +83,12 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
+    public ChatEntity findChatByUsers(Long firstUserId, Long secondUserId) throws ChatNotFoundException, UserNotFoundException {
+        Long chatId = chatRepository.findDuoChatByUsers(firstUserId, secondUserId).orElseThrow(UserNotFoundException::new);
+        return findChatById(chatId, DUO);
+    }
+
+    @Override
     public DuoChat createDuoChat(Long fromUserId, Long toUserId)
             throws UserNotFoundException, ChatAlreadyExistsException {
 
