@@ -11,6 +11,7 @@ import com.example.kaizenchat.service.ChatService;
 import com.example.kaizenchat.service.MessageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -31,7 +32,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Autowired
     public MessageServiceImpl(MessageRepository messageRepository, ChatRepository chatRepository,
-                              UserRepository userRepository, ChatService chatService){
+                              UserRepository userRepository, @Lazy ChatService chatService){
         this.messageRepository = messageRepository;
         this.chatRepository = chatRepository;
         this.userRepository = userRepository;
