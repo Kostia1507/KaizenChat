@@ -24,7 +24,7 @@ public interface ChatService {
 
     void deleteDuoChatById(Long id) throws ChatNotFoundException;
 
-    DuoChat createDuoChat(DuoChatCreationRequest request, Long fromUserId, Long toUserId)
+    DuoChat createDuoChat(Long fromUserId, Long toUserId)
             throws UserNotFoundException, ChatAlreadyExistsException;
 
     GroupChat createGroupChat(GroupChatCreationRequest request, Long userId) throws UserNotFoundException;

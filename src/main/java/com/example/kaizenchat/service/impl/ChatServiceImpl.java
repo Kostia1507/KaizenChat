@@ -83,7 +83,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public DuoChat createDuoChat(DuoChatCreationRequest request, Long fromUserId, Long toUserId)
+    public DuoChat createDuoChat(Long fromUserId, Long toUserId)
             throws UserNotFoundException, ChatAlreadyExistsException {
 
         log.info("IN ChatService -> createDuoChat(): between users id:{} <-> id:{}", fromUserId, toUserId);
