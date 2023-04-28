@@ -1,6 +1,7 @@
 package com.example.kaizenchat.controller;
 
 import com.example.kaizenchat.dto.AddMemberToChatRequest;
+import com.example.kaizenchat.dto.Chat;
 import com.example.kaizenchat.dto.IncomingMessage;
 import com.example.kaizenchat.dto.OutgoingMessage;
 import com.example.kaizenchat.entity.ChatEntity;
@@ -15,15 +16,22 @@ import com.example.kaizenchat.service.MessageService;
 import com.example.kaizenchat.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+import java.util.Map;
 
 import static com.example.kaizenchat.dto.Action.*;
 import static com.example.kaizenchat.model.ChatType.GROUP;
@@ -131,6 +139,26 @@ public class GroupChatController {
     @MessageExceptionHandler(RuntimeException.class)
     public void handleExceptions(RuntimeException e) {
         log.error("EXCEPTION: {}", e.getMessage());
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllChats() {
+        var userDetails = (UserDetailsImpl) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        Long userId = userDetails.getId();
+        log.info("ChatController ->  getAllChats(): user-id={}", userId);
+
+        try {
+            List<Chat> chats = chatService.getAllChats(userId, GROUP);
+            return ResponseEntity.ok(chats);
+        } catch (UserNotFoundException e) {
+            log.error("ChatController ->  getAllChats(): {}", e.getMessage());
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", "user is not found"));
+        }
     }
 
 }
