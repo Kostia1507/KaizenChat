@@ -1,10 +1,12 @@
 package com.example.kaizenchat.service.impl;
 
 import com.example.kaizenchat.dto.AddMemberToChatRequest;
+import com.example.kaizenchat.dto.Chat;
 import com.example.kaizenchat.dto.DuoChatCreationRequest;
 import com.example.kaizenchat.dto.GroupChatCreationRequest;
 import com.example.kaizenchat.entity.ChatEntity;
 import com.example.kaizenchat.entity.GroupChatOptionsEntity;
+import com.example.kaizenchat.entity.MessageEntity;
 import com.example.kaizenchat.entity.UserEntity;
 import com.example.kaizenchat.exception.ChatAlreadyExistsException;
 import com.example.kaizenchat.exception.ChatNotFoundException;
@@ -24,12 +26,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import static com.example.kaizenchat.model.ChatType.DUO;
 import static com.example.kaizenchat.model.ChatType.GROUP;
 import static java.lang.String.format;
+import static java.util.Comparator.comparing;
 
 @Slf4j
 @Service
@@ -176,6 +180,41 @@ public class ChatServiceImpl implements ChatService {
         groupChatOptions.setMembersCount(membersCount + 1);
         groupChatOptionsRepository.save(groupChatOptions);
         return true;
+    }
+
+    @Override
+    public List<Chat> getAllChats(Long userId, ChatType type) throws UserNotFoundException {
+        UserEntity user = userService.findUserById(userId);
+        log.info("IN ChatService -> getAllChats(): user-id={}", user.getId());
+
+        Set<ChatEntity> chats = type.equals(GROUP) ? user.getGroupChats() : user.getDuoChats();
+        return chats.stream()
+                .map(this::getChatWithLastMessage)
+                .filter(chat -> chat.getLastMessage() != null)
+                .sorted(comparing(Chat::getLastMessageTime).reversed())
+                .toList();
+    }
+
+    private Chat getChatWithLastMessage(ChatEntity chat) {
+        Set<MessageEntity> lastMessages = chat.getMessages();
+        log.info("IN ChatService -> getChatWithLastMessage(): chat-id={} list size={}", chat.getId(), lastMessages.size());
+
+        if (lastMessages.isEmpty()) {
+            return new Chat(chat.getId(), null, null, null, null);
+        }
+
+        MessageEntity lastMessage = lastMessages.stream()
+                .max(comparing(MessageEntity::getTime))
+                .orElse(new MessageEntity());
+
+        UserEntity sender = lastMessage.getSender();
+        return new Chat(
+                chat.getId(),
+                sender.getId(),
+                sender.getNickname(),
+                lastMessage.getBody(),
+                lastMessage.getTime()
+        );
     }
 
     @Override

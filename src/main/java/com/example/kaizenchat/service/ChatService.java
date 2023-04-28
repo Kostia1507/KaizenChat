@@ -1,6 +1,7 @@
 package com.example.kaizenchat.service;
 
 import com.example.kaizenchat.dto.AddMemberToChatRequest;
+import com.example.kaizenchat.dto.Chat;
 import com.example.kaizenchat.dto.DuoChatCreationRequest;
 import com.example.kaizenchat.dto.GroupChatCreationRequest;
 import com.example.kaizenchat.entity.ChatEntity;
@@ -12,6 +13,8 @@ import com.example.kaizenchat.exception.UserViolationPermissionsException;
 import com.example.kaizenchat.model.ChatType;
 import com.example.kaizenchat.model.DuoChat;
 import com.example.kaizenchat.model.GroupChat;
+
+import java.util.List;
 
 public interface ChatService {
 
@@ -28,6 +31,8 @@ public interface ChatService {
 
     boolean addUserToGroupChat(AddMemberToChatRequest request, Long userId)
             throws ChatNotFoundException, UserNotFoundException, UserViolationPermissionsException;
+
+    List<Chat> getAllChats(Long userId, ChatType type) throws UserNotFoundException;
 
     boolean isMemberInGroupChat(UserEntity user, ChatEntity chat);
 
