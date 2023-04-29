@@ -101,7 +101,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(@NonNull MessageBrokerRegistry registry) {
         registry.setApplicationDestinationPrefixes("/app")
-                .setUserDestinationPrefix("/user")
-                .enableSimpleBroker("/chatroom", "/user");
+                .enableSimpleBroker("/chatroom", "/user", "/duo-chat");
     }
 }
