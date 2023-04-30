@@ -7,6 +7,7 @@ import com.example.kaizenchat.exception.UserNotFoundException;
 import com.example.kaizenchat.model.Avatar;
 import com.example.kaizenchat.security.jwt.UserDetailsImpl;
 import com.example.kaizenchat.service.UserService;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -33,34 +34,31 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping(path = "/phone/{phoneNumber}")
-    public ResponseEntity<Map<String, UserEntity>> getUserByPhoneNumber(@PathVariable String phoneNumber) {
-        try {
-            UserEntity user = userService.findUserByPhoneNumber(phoneNumber);
-            return ResponseEntity.ok(Map.of("user", user));
-        } catch (UserNotFoundException e) {
-            return ResponseEntity.status(NOT_FOUND).body(Map.of("user", new UserEntity()));
-        }
+    @GetMapping("/phone/{phoneNumber}")
+    public ResponseEntity<Map<String, UserEntity>> getUserByPhoneNumber(@PathVariable String phoneNumber)
+            throws UserNotFoundException {
+
+        log.info("IN UserController -> getUserByPhoneNumber(): {}", phoneNumber);
+        UserEntity user = userService.findUserByPhoneNumber(phoneNumber);
+        return ResponseEntity.ok(of("user", user));
     }
 
-    @GetMapping(path = "/id/{userId}")
-    public ResponseEntity<Map<String, UserEntity>> getUserById(@PathVariable Long userId) {
-        try {
-            UserEntity user = userService.findUserById(userId);
-            return ResponseEntity.ok(Map.of("user", user));
-        } catch (UserNotFoundException e) {
-            return ResponseEntity.status(NOT_FOUND).body(Map.of("user", new UserEntity()));
-        }
+    @GetMapping("/id/{userId}")
+    public ResponseEntity<Map<String, UserEntity>> getUserById(@PathVariable Long userId)
+            throws UserNotFoundException {
+
+        log.info("IN UserController -> getUserById(): {}", userId);
+        UserEntity user = userService.findUserById(userId);
+        return ResponseEntity.ok(of("user", user));
     }
 
-    @PostMapping(path = "/update")
-    public ResponseEntity<Map<String, String>> updateUser(@RequestBody UserUpdateRequest request) {
-        try {
-            userService.updateUser(request.getId(), request.getNickname(), null, request.getBio());
-            return ResponseEntity.ok().body(Map.of("message","user updated"));
-        } catch (UserNotFoundException e) {
-            return ResponseEntity.status(NOT_FOUND).body(Map.of("message","wrong id"));
-        }
+    @PostMapping("/update")
+    public ResponseEntity<Map<String, String>> updateUser(@Valid @RequestBody UserUpdateRequest request)
+            throws UserNotFoundException {
+
+        log.info("IN UserController -> updateUser(): id={}", request.getId());
+        userService.updateUser(request.getId(), request.getNickname(), null, request.getBio());
+        return ResponseEntity.ok().body(of("message", "user updated"));
     }
 
     @PostMapping("/upload-avatar")
@@ -97,17 +95,14 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/download-avatar")
-    public ResponseEntity<byte[]> downloadAvatar(@PathVariable long userId) {
+    public ResponseEntity<byte[]> downloadAvatar(@PathVariable long userId)
+            throws UserNotFoundException, AvatarNotExistsException {
+
         log.info("IN UserController -> downloadAvatar(): user-id={}", userId);
-        try {
-            Avatar avatar = userService.downloadAvatar(userId);
-            return ResponseEntity.ok()
-                    .contentType(avatar.contentType())
-                    .body(avatar.bytes());
-        } catch (UserNotFoundException | AvatarNotExistsException e) {
-            log.info("IN UserController -> downloadAvatar(): {}", e.getMessage());
-            return ResponseEntity.status(NOT_FOUND).body(new byte[0]);
-        }
+        Avatar avatar = userService.downloadAvatar(userId);
+        return ResponseEntity.ok()
+                .contentType(avatar.contentType())
+                .body(avatar.bytes());
     }
 
 }
