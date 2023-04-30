@@ -62,7 +62,7 @@ public class ChatServiceImpl implements ChatService {
     public ChatEntity findChatById(Long id, ChatType type) throws ChatNotFoundException {
         Optional<ChatEntity> chatOpt = chatRepository.findById(id);
         if (chatOpt.isEmpty() || (chatOpt.get().isGroupChat() && type.equals(DUO))) {
-            throw new ChatNotFoundException();
+            throw new ChatNotFoundException(format("%s-chat:%d was not found", type.name(), id));
         }
         return chatOpt.get();
     }
@@ -83,8 +83,11 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public ChatEntity findChatByUsers(Long firstUserId, Long secondUserId) throws ChatNotFoundException, UserNotFoundException {
-        Long chatId = chatRepository.findDuoChatByUsers(firstUserId, secondUserId).orElseThrow(UserNotFoundException::new);
+    public ChatEntity findChatByUsers(Long firstUserId, Long secondUserId) throws ChatNotFoundException {
+        Long chatId = chatRepository.findDuoChatByUsers(firstUserId, secondUserId)
+                .orElseThrow(() -> new ChatNotFoundException(
+                        format("duo-chat between [%d, %d] was not found", firstUserId, secondUserId)
+                ));
         return findChatById(chatId, DUO);
     }
 

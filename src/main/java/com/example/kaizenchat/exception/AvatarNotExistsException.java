@@ -1,10 +1,9 @@
 package com.example.kaizenchat.exception;
 
 public class AvatarNotExistsException extends Exception {
-    public AvatarNotExistsException() {
+
+    public AvatarNotExistsException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    public AvatarNotExistsException(Throwable cause) {
-        super(cause);
-    }
 }

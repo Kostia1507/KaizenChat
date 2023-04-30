@@ -5,6 +5,7 @@ import com.example.kaizenchat.dto.UserLoginRequest;
 import com.example.kaizenchat.dto.UserRegistrationRequest;
 import com.example.kaizenchat.exception.InvalidRequestDataException;
 import com.example.kaizenchat.service.UserService;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -33,25 +34,19 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> register(@RequestBody UserRegistrationRequest request) {
+    public ResponseEntity<Map<String, String>> register(@Valid @RequestBody UserRegistrationRequest request) {
         log.info("IN AuthController register(): body {}", request);
         try {
-            if (UserRegistrationRequest.hasEmptyField(request)) {
-                throw new InvalidRequestDataException();
-            }
             return ResponseEntity.ok(userService.register(request));
-        } catch (InvalidRequestDataException | BadCredentialsException e) {
+        } catch (BadCredentialsException e) {
             log.info("IN AuthController -> register(): invalid request data");
             return ResponseEntity.status(FORBIDDEN).body(Map.of("message", "invalid request"));
         }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody UserLoginRequest request) {
+    public ResponseEntity<Map<String, String>> login(@Valid @RequestBody UserLoginRequest request) {
         try {
-            if (UserLoginRequest.hasEmptyField(request)) {
-                throw new InvalidRequestDataException();
-            }
             Map<String, String> responseBody = new HashMap<>(userService.login(request));
             responseBody.put("isRegistered", "true");
             return ResponseEntity.ok(responseBody);
@@ -62,13 +57,9 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<Map<String, String>> refresh(@RequestBody RefreshTokenRequest request) {
+    public ResponseEntity<Map<String, String>> refresh(@Valid @RequestBody RefreshTokenRequest request) {
         try {
-            String oldRefreshToken = request.getOldRefreshToken();
-            if (oldRefreshToken == null || oldRefreshToken.isEmpty()) {
-                throw new InvalidRequestDataException();
-            }
-            return ResponseEntity.ok(userService.refreshTokens(oldRefreshToken));
+            return ResponseEntity.ok(userService.refreshTokens(request.getOldRefreshToken()));
         } catch (InvalidRequestDataException e) {
             log.info("IN AuthController -> refresh(): invalid request data");
             return ResponseEntity.status(FORBIDDEN).body(Map.of("message", "wrong refresh token"));

@@ -44,6 +44,16 @@
 }
 ```
 
+- 400:
+
+```json
+{
+    "password": "length should be 8 or longer",
+    "phoneNumber": "length should be 13",
+    "nickname": "should not be blank"
+}
+```
+
 - 403:
 
 ```json
@@ -86,6 +96,22 @@
   "accessTokenExpiration": "2023-04-14T23:40:02+03:00",
   "refreshTokenExpiration": "2023-05-14T23:10:02+03:00",
   "refreshToken": "..."
+}
+```
+
+- 400:
+
+```json
+{
+  "password": "length should be 8 or longer",
+  "phoneNumber": "length should be 13"
+}
+```
+
+```json
+{
+  "password": "should not be blank",
+  "phoneNumber": "should not be blank"
 }
 ```
 
@@ -132,6 +158,14 @@
 }
 ```
 
+- 400:
+
+```json
+{
+  "oldRefreshToken": "should not be blank"
+}
+```
+
 - 403:
 
 ```json
@@ -173,14 +207,10 @@
 
 ```json
 {
-  "user": {
-    "id": null,
-    "phoneNumber": null,
-    "nickname": null,
-    "avatar": null,
-    "bio": null,
-    "registration": null
-  }
+  "path": "/user/id/546",
+  "message": "user with id:546 not found",
+  "statusCode": 404,
+  "timestamp": "2023-04-30T14:29:13.080851+03:00"
 }
 ```
 <br/>
@@ -210,14 +240,10 @@
 
 ```json
 {
-  "user": {
-    "id": null,
-    "phoneNumber": null,
-    "nickname": null,
-    "avatar": null,
-    "bio": null,
-    "registration": null
-  }
+  "path": "/user/phone/+38057865890",
+  "message": "user with phone-number:[+38057865890] not found",
+  "statusCode": 404,
+  "timestamp": "2023-04-30T14:30:18.7618307+03:00"
 }
 ```
 <br/>
@@ -248,11 +274,22 @@
 }
 ```
 
-- 403:
+- 400:
 
 ```json
 {
-  "message": "wrong id"
+    "nickname": "length should be 4 or longer"
+}
+```
+
+- 404:
+
+```json
+{
+  "path": "/user/update",
+  "message": "user with id:564 not found",
+  "statusCode": 404,
+  "timestamp": "2023-04-30T14:32:23.2791826+03:00"
 }
 ```
 
@@ -277,7 +314,7 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 
 ```json
 {
-    "message": "updated"
+  "message": "updated"
 }
 ```
 
@@ -285,19 +322,19 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 
 ```json
 {
-    "message": "file is not present"
+  "message": "file is not present"
 }
 ```
 
 ```json
 {
-    "message": "file size is greater than 3MB"
+  "message": "file size is greater than 3MB"
 }
 ```
 
 ```json
 {
-    "message": "uploaded file is not an image"
+  "message": "uploaded file is not an image"
 }
 ```
 
@@ -305,7 +342,7 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 
 ```json
 {
-    "message": "user is not defined"
+  "message": "user is not defined"
 }
 ```
 
@@ -348,20 +385,20 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 
 ```json
 [
-    {
-        "id": 5,
-        "userId": 2,
-        "username": "bie3",
-        "lastMessage": "yooo",
-        "lastMessageTime": "2023-04-28T14:20:26.983+03:00"
-    },
-    {
-        "id": 4,
-        "userId": 2,
-        "username": "bie3",
-        "lastMessage": "hello world",
-        "lastMessageTime": "2023-04-25T10:42:09.449007+03:00"
-    }
+  {
+    "id": 5,
+    "userId": 2,
+    "username": "bie3",
+    "lastMessage": "yooo",
+    "lastMessageTime": "2023-04-28T14:20:26.983+03:00"
+  },
+  {
+    "id": 4,
+    "userId": 2,
+    "username": "bie3",
+    "lastMessage": "hello world",
+    "lastMessageTime": "2023-04-25T10:42:09.449007+03:00"
+  }
 ]
 ```
 

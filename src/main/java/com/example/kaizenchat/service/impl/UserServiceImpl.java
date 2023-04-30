@@ -33,6 +33,7 @@ import java.util.Set;
 import static com.example.kaizenchat.security.jwt.JWTType.ACCESS;
 import static com.example.kaizenchat.security.jwt.JWTType.REFRESH;
 import static com.example.kaizenchat.utils.MultipartFileUtils.getFileExtension;
+import static java.lang.String.format;
 
 @Slf4j
 @Service
@@ -57,12 +58,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserEntity findUserById(Long id) throws UserNotFoundException {
-        return userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+        return userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(format("user with id:%d not found", id)));
     }
 
     @Override
     public UserEntity findUserByPhoneNumber(String phoneNumber) throws UserNotFoundException {
-        return userRepository.findByPhoneNumber(phoneNumber).orElseThrow(UserNotFoundException::new);
+        return userRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UserNotFoundException(format("user with phone-number:[%s] not found", phoneNumber)));
     }
 
     @Override
@@ -128,8 +131,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUser(Long userId, String nickname, String avatar, String bio) throws UserNotFoundException{
-        UserEntity user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+    public void updateUser(Long userId, String nickname, String avatar, String bio) throws UserNotFoundException {
+        UserEntity user = findUserById(userId);
         user.setNickname(nickname != null ? nickname : user.getNickname());
         user.setAvatar(avatar != null ? avatar : user.getAvatar());
         user.setBio(bio != null ? bio : user.getBio());
@@ -170,7 +173,7 @@ public class UserServiceImpl implements UserService {
             return new Avatar(pathString, type, bytes);
         } catch (IOException e) {
             log.error("IN UserService -> downloadAvatar(): {}", e.getMessage());
-            throw new AvatarNotExistsException(e);
+            throw new AvatarNotExistsException(format("avatar for user:%d was not found", userId), e);
         }
     }
 
