@@ -9,6 +9,7 @@ import com.example.kaizenchat.repository.MessageRepository;
 import com.example.kaizenchat.repository.UserRepository;
 import com.example.kaizenchat.service.ChatService;
 import com.example.kaizenchat.service.MessageService;
+import com.example.kaizenchat.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -21,21 +22,23 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import static java.lang.String.format;
+
 @Slf4j
 @Service
 public class MessageServiceImpl implements MessageService {
 
     private final MessageRepository messageRepository;
     private final ChatRepository chatRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final ChatService chatService;
 
     @Autowired
     public MessageServiceImpl(MessageRepository messageRepository, ChatRepository chatRepository,
-                              UserRepository userRepository, @Lazy ChatService chatService){
+                              UserService userService, @Lazy ChatService chatService){
         this.messageRepository = messageRepository;
         this.chatRepository = chatRepository;
-        this.userRepository = userRepository;
+        this.userService = userService;
         this.chatService = chatService;
     }
 
@@ -45,8 +48,9 @@ public class MessageServiceImpl implements MessageService {
 
     public void createNewMessage(Long chatId, Long senderId, String body)
             throws UserNotFoundException, ChatNotFoundException, UserNotFoundInChatException {
-        UserEntity user = userRepository.findById(senderId).orElseThrow(UserNotFoundException::new);
-        ChatEntity chat = chatRepository.findById(chatId).orElseThrow(ChatNotFoundException::new);
+        UserEntity user = userService.findUserById(senderId);
+        ChatEntity chat = chatRepository.findById(chatId)
+                .orElseThrow(() -> new ChatNotFoundException(format("chat:%d was not found", chatId)));
 
         Set<UserEntity> users = chat.getUsers();
         if(users.contains(user)){
@@ -64,7 +68,8 @@ public class MessageServiceImpl implements MessageService {
 
     public void editMessage(Long senderId, Long messageId, String body)
             throws UserNotFoundException, MessageNotFoundException, UserViolationPermissionsException {
-        UserEntity user = userRepository.findById(senderId).orElseThrow(UserNotFoundException::new);
+
+        UserEntity user = userService.findUserById(senderId);
         MessageEntity message = messageRepository.findById(messageId).orElseThrow(MessageNotFoundException::new);
 
         if(message.getSender().equals(user)){
