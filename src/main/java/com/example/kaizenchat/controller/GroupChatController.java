@@ -161,7 +161,7 @@ public class GroupChatController {
 
     @PostMapping("/messages")
     public ResponseEntity<Map<String, Object>> getLastMessages(@Valid @RequestBody LastMessagesRequest request)
-            throws ChatNotFoundException, UserNotFoundException {
+            throws ChatNotFoundException, UserNotFoundException, UserNotFoundInChatException {
         var userDetails = (UserDetailsImpl) SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getPrincipal();
@@ -177,6 +177,6 @@ public class GroupChatController {
                 messages = messageService.getLastMessages(request.getChatId(), request.getTime(), GET_MESSAGES_LIMIT);
             return ResponseEntity.ok().body(Map.of("messages", messages));
         }else
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "not member of chat"));
+            throw new UserNotFoundInChatException("not member of chat");
     }
 }
