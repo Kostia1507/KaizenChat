@@ -151,7 +151,7 @@ public class DuoChatController {
                 messages = messageService.getLastMessages(request.getChatId(), request.getTime(), GET_MESSAGES_LIMIT);
             return ResponseEntity.ok().body(Map.of("messages", messages));
         }else
-            throw new UserNotFoundInChatException();
+            throw new UserNotFoundInChatException("not member of chat");
     }
 
     @Transactional
