@@ -149,16 +149,16 @@ public class DuoChatController {
     }
 
     @Transactional
-    @MessageMapping("/duo-chat/send/{chatId}")
-    public void sendMessage(@DestinationVariable Long chatId, @Payload IncomingMessage message, Authentication auth){
+    @MessageMapping("/duo-chat/send")
+    public void sendMessage(@Payload IncomingMessage message, Authentication auth){
         var userDetails = (UserDetailsImpl) auth.getPrincipal();
         Long userId = userDetails.getId();
-        log.info("DuoChatController ->  sendMessage(): user-id={} chat-id={}", userId, chatId);
+        log.info("DuoChatController ->  sendMessage(): user-id={} chat-id={}", userId, message.getChatId());
         try {
             UserEntity user = userService.findUserById(userId);
-            messageService.createNewMessage(chatId, userId, message.getBody());
-            var outgoingMessage = new OutgoingMessage(SEND, userId, user.getNickname(), chatId, message.getBody(), now());
-            template.convertAndSend("/duo-chat/" + chatId, outgoingMessage);
+            messageService.createNewMessage(message.getChatId(), userId, message.getBody());
+            var outgoingMessage = new OutgoingMessage(SEND, userId, user.getNickname(), message.getChatId(), message.getBody(), now());
+            template.convertAndSend("/duo-chat/" + message.getChatId(), outgoingMessage);
         } catch (UserNotFoundException | ChatNotFoundException | UserNotFoundInChatException e) {
             log.error("DuoChatController ->  sendMessage: {}", e.getMessage());
         }

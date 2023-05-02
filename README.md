@@ -437,6 +437,26 @@ When Stomp client is created over web-socket he has to connect to the server wit
 
 <details>
 
+**Path:** `/user/{user-id}/start`
+
+**WS Client:** StompJS
+
+**Headers:** `Authorization: bearer (jwt)`
+
+**Description:** this end-point is used to obtain information about new duo chats.
+
+---
+
+**Path:** `/duo-chat/{chat-id}`
+
+**WS Client:** StompJS
+
+**Headers:** `Authorization: bearer (jwt)`
+
+**Description:** this end-point is used to subscribe only on duo chats.
+
+---
+
 **Path:** `/chatroom/{chat-id}`
 
 **WS Client:** StompJS
@@ -803,6 +823,102 @@ Time can be null
   "message": "DUO-chat:10 was not found",
   "statusCode": 404,
   "timestamp": "2023-05-02T11:58:58.4126182+03:00"
+}
+```
+
+</details>
+
+---
+
+### Send message
+
+<details>
+**Path:** `/duo-chat/send`
+
+**WS Client:** StompJS
+
+**Headers:** `Authorization: bearer (jwt)`
+
+**Body:**
+
+```json
+{
+  "chatId": 4,
+  "body": "..."
+}
+```
+
+**Responses:**
+
+- Status: `MESSAGE`
+
+```json
+{
+  "action": "SEND",
+  "body": "hello world",
+  "chatId": 4,
+  "senderId": 2,
+  "senderNickname": "bie3",
+  "timeStamp": "2023-04-25T10:42:09.4639461+03:00"
+}
+```
+</details>
+
+---
+
+### Edit message
+
+<details>
+**Path:** `/duo-chat/edit`
+
+**WS Client:** StompJS
+
+**Headers:** `Authorization: bearer (jwt)`
+
+**Body:**
+
+```json
+{
+  "messageId": 4,
+  "body": "..."
+}
+```
+
+**Responses:**
+
+- Status: `MESSAGE`
+
+```json
+{
+  "action": "EDIT",
+  "body": "hello world",
+  "chatId": 3,
+  "messageId": 4
+}
+```
+
+</details>
+
+---
+
+### Delete message
+
+<details>
+**Path:** `/duo-chat/delete/{messageId}`
+
+**WS Client:** StompJS
+
+**Headers:** `Authorization: bearer (jwt)`
+
+**Responses:**
+
+- Status: `MESSAGE`
+
+```json
+{
+  "action": "DELETE",
+  "chatId": 3,
+  "messageId": 4
 }
 ```
 
