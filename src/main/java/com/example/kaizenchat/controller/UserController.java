@@ -19,8 +19,7 @@ import java.util.Map;
 
 import static com.example.kaizenchat.utils.MultipartFileUtils.isNotValidFileSize;
 import static java.util.Map.of;
-import static org.springframework.http.HttpStatus.FORBIDDEN;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.*;
 
 @Slf4j
 @RestController
@@ -41,6 +40,13 @@ public class UserController {
         log.info("IN UserController -> getUserByPhoneNumber(): {}", phoneNumber);
         UserEntity user = userService.findUserByPhoneNumber(phoneNumber);
         return ResponseEntity.ok(of("user", user));
+    }
+
+    @ResponseStatus(NO_CONTENT)
+    @GetMapping("/exists/{phoneNumber}")
+    public void checkPhoneNumberExistence(@PathVariable String phoneNumber) throws UserNotFoundException {
+        log.info("IN UserController -> checkPhoneNumberExistence(): {}", phoneNumber);
+        userService.findUserByPhoneNumber(phoneNumber);
     }
 
     @GetMapping("/id/{userId}")
