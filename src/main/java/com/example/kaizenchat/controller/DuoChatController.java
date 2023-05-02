@@ -181,7 +181,22 @@ public class DuoChatController {
                 .messageId(message.getId())
                 .build();
         template.convertAndSend("/duo-chat/" + message.getChat().getId(), outgoingMessage);
+    }
 
+    @Transactional
+    @MessageMapping("/duo-chat/delete/{messageId}")
+    public void deleteMessage(@DestinationVariable Long messageId, Authentication auth)
+            throws MessageNotFoundException, UserViolationPermissionsException {
+        var userDetails = (UserDetailsImpl) auth.getPrincipal();
+        Long userId = userDetails.getId();
+        Long chatId = messageService.findMessageById(messageId).orElseThrow(MessageNotFoundException::new).getChat().getId();
+        messageService.deleteMessageById(messageId, userId);
+        OutgoingMessage outgoingMessage = OutgoingMessage.builder()
+                .action(DELETE)
+                .chatId(chatId)
+                .messageId(messageId)
+                .build();
+        template.convertAndSend("/duo-chat/" + chatId, outgoingMessage);
     }
 
 
