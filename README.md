@@ -551,3 +551,261 @@ When Stomp client is created over web-socket he has to connect to the server wit
 ```
 
 </details>
+
+## Duo chats
+
+<details>
+
+### Start a chat
+
+<details>
+
+**Path:** `http://localhost:8080/user/duo-chats/start/{userId}`
+
+**Method:** GET
+
+**Responses:**
+
+- 200:
+
+```json
+{
+  "chatId": 6
+}
+```
+
+- 403:
+
+```json
+{
+  "message": "Something wrong"
+}
+```
+
+</details>
+
+---
+
+### Get all duo chats 
+
+<details>
+
+**Path:** `http://localhost:8080/user/duo-chats/{chatId}`
+
+**Method:** GET
+
+**Responses:**
+
+- 200:
+
+```json
+[
+  {
+    "id": 1,
+    "userId": 1,
+    "username": "...",
+    "lastMessage": "...",
+    "lastMessageTime": "2023-04-23T10:51:36.129+03:00"
+  },
+  {
+    "id": 2,
+    "userId": 1,
+    "username": "...",
+    "lastMessage": "...",
+    "lastMessageTime": "2023-04-23T10:51:36.129+03:00"
+  }
+]
+```
+
+</details>
+
+---
+
+### Get chat by ID
+
+<details>
+
+**Path:** `http://localhost:8080/user/duo-chats/{chatId}`
+
+**Method:** GET
+
+**Responses:**
+
+- 200:
+
+```json
+{
+  "id": 1,
+  "name": "Duo",
+  "creation": "...",
+  "groupChatOptions": null,
+  "messages": [],
+  "users": [
+    {
+      "id": 1,
+      "phoneNumber": "...",
+      "nickname": "...",
+      "avatar": "...",
+      "bio": "...",
+      "registration": "2023-04-23T10:51:36.129+03:00"
+    },
+    {
+      "id": 2,
+      "phoneNumber": "...",
+      "nickname": "...",
+      "avatar": "...",
+      "bio": "...",
+      "registration": "2023-04-23T10:51:36.129+03:00"
+    }
+  ],
+  "groupChat": false
+}
+```
+
+- 403:
+
+```json
+{
+  "message": "chat not found"
+}
+```
+
+</details>
+
+---
+
+### Get chat with specific User
+
+<details>
+
+**Path:** `http://localhost:8080/user/duo-chats/with/{userId}`
+
+**Method:** GET
+
+**Responses:**
+
+- 200:
+
+```json
+{
+  "id": 1,
+  "name": "Duo",
+  "creation": "...",
+  "groupChatOptions": null,
+  "messages": [],
+  "users": [
+    {
+      "id": 1,
+      "phoneNumber": "...",
+      "nickname": "...",
+      "avatar": "...",
+      "bio": "...",
+      "registration": "2023-04-23T10:51:36.129+03:00"
+    },
+    {
+      "id": 2,
+      "phoneNumber": "...",
+      "nickname": "...",
+      "avatar": "...",
+      "bio": "...",
+      "registration": "2023-04-23T10:51:36.129+03:00"
+    }
+  ],
+  "groupChat": false
+}
+```
+
+- 403:
+
+```json
+{
+  "message": "duo-chat between [1, 2] was not found"
+}
+```
+
+---
+
+</details>
+
+---
+
+### Get last messages
+
+<details>
+
+**Path:** `localhost:8080/user/duo-chats/messages`
+
+**Method:** POST
+
+**Format:** JSON
+
+**Body:**
+
+```json
+{
+  "chatId":1,
+  "time":"2023-04-14T23:40:02+03:00"
+}
+```
+Time can be null
+
+**Responses:**
+
+- 200:
+
+```json
+{
+  "messages": [
+    {
+      "id": 1,
+      "body": "...",
+      "time": "2023-04-23T10:51:36.129+03:00",
+      "isPinned": false,
+      "likes": 0
+    },
+    {
+      "id": 2,
+      "body": "...",
+      "time": "2023-04-23T11:53:48.129+03:00",
+      "isPinned": false,
+      "likes": 0
+    }
+  ]
+}
+```
+
+- 400:
+
+```json
+{
+    "password": "length should be 8 or longer",
+    "phoneNumber": "length should be 13",
+    "nickname": "should not be blank"
+}
+```
+
+- 404:
+
+```json
+{
+  "path": "/user/duo-chats/messages",
+  "message": "not member of chat",
+  "statusCode": 404,
+  "timestamp": "2023-05-02T11:53:49.8606015+03:00"
+}
+```
+
+- 404:
+
+```json
+{
+  "path": "/user/duo-chats/messages",
+  "message": "DUO-chat:10 was not found",
+  "statusCode": 404,
+  "timestamp": "2023-05-02T11:58:58.4126182+03:00"
+}
+```
+
+</details>
+
+</details>

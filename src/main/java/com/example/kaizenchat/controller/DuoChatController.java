@@ -121,8 +121,8 @@ public class DuoChatController {
         try {
             Long chatId = chatService.createDuoChat(userId, id).getId();
             OutgoingMessage message = OutgoingMessage.builder().action(JOIN).chatId(chatId).build();
-            template.convertAndSend("/user/"+id, message);
-            return ResponseEntity.ok().body(Map.of("message", chatId));
+            template.convertAndSend("/user/"+id+"/start", message);
+            return ResponseEntity.ok().body(Map.of("chatId", chatId));
         } catch (UserNotFoundException | ChatAlreadyExistsException e) {
             log.error("DuoChatController ->  startChat: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Something wrong"));
