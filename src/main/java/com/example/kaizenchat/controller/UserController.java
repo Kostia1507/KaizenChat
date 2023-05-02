@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Map;
 
 import static com.example.kaizenchat.utils.MultipartFileUtils.isNotValidFileSize;
+import static com.example.kaizenchat.utils.MultipartFileUtils.isNotValidFileType;
 import static java.util.Map.of;
 import static org.springframework.http.HttpStatus.*;
 
@@ -33,13 +35,14 @@ public class UserController {
         this.userService = userService;
     }
 
+    @ResponseStatus(OK)
     @GetMapping("/phone/{phoneNumber}")
-    public ResponseEntity<Map<String, UserEntity>> getUserByPhoneNumber(@PathVariable String phoneNumber)
+    public Map<String, UserEntity> getUserByPhoneNumber(@PathVariable String phoneNumber)
             throws UserNotFoundException {
 
         log.info("IN UserController -> getUserByPhoneNumber(): {}", phoneNumber);
         UserEntity user = userService.findUserByPhoneNumber(phoneNumber);
-        return ResponseEntity.ok(of("user", user));
+        return of("user", user);
     }
 
     @ResponseStatus(NO_CONTENT)
@@ -49,40 +52,39 @@ public class UserController {
         userService.findUserByPhoneNumber(phoneNumber);
     }
 
+    @ResponseStatus(OK)
     @GetMapping("/id/{userId}")
-    public ResponseEntity<Map<String, UserEntity>> getUserById(@PathVariable Long userId)
+    public Map<String, UserEntity> getUserById(@PathVariable Long userId)
             throws UserNotFoundException {
 
         log.info("IN UserController -> getUserById(): {}", userId);
         UserEntity user = userService.findUserById(userId);
-        return ResponseEntity.ok(of("user", user));
+        return of("user", user);
     }
 
+    @ResponseStatus(OK)
     @PostMapping("/update")
-    public ResponseEntity<Map<String, String>> updateUser(@Valid @RequestBody UserUpdateRequest request)
+    public Map<String, String> updateUser(@Valid @RequestBody UserUpdateRequest request)
             throws UserNotFoundException {
 
         log.info("IN UserController -> updateUser(): id={}", request.getId());
         userService.updateUser(request.getId(), request.getNickname(), null, request.getBio());
-        return ResponseEntity.ok().body(of("message", "user updated"));
+        return of("message", "user updated");
     }
 
+    @ResponseStatus(OK)
     @PostMapping("/upload-avatar")
-    public ResponseEntity<Map<String, String>> uploadAvatar(@RequestParam("avatar") MultipartFile file) {
+    public Map<String, String> uploadAvatar(@RequestParam("avatar") MultipartFile file)
+            throws UserNotFoundException {
+
         log.info("IN UserController -> uploadAvatar(): file-size={} bytes", file.getSize());
 
         if (file.isEmpty()) {
-            return ResponseEntity.badRequest().body(
-                    of("message", "file is not present")
-            );
+            throw new BadCredentialsException("file is not present");
         } else if (isNotValidFileSize(file)) {
-            return ResponseEntity.badRequest().body(
-                    of("message", "file size is greater than 3MB")
-            );
-        } else if (isNotValidFileSize(file)) {
-            return ResponseEntity.badRequest().body(
-                    of("message", "uploaded file is not an image")
-            );
+            throw new BadCredentialsException("file size is greater than 3MB");
+        } else if (isNotValidFileType(file)) {
+            throw new BadCredentialsException("uploaded file is not an image");
         }
 
         var userDetails = (UserDetailsImpl) SecurityContextHolder
@@ -92,15 +94,12 @@ public class UserController {
 
         boolean isUpdated = userService.updateAvatar(file, userDetails.getId());
         if (isUpdated) {
-            return ResponseEntity.ok(of("message", "updated"));
-        } else {
-            return ResponseEntity.status(FORBIDDEN).body(
-                    of("message", "user is not defined")
-            );
+            return of("message", "updated");
         }
+        throw new UserNotFoundException("user is not defined");
     }
 
-    @GetMapping("/{userId}/download-avatar")
+    @GetMapping("/{userId}/avatar")
     public ResponseEntity<byte[]> downloadAvatar(@PathVariable long userId)
             throws UserNotFoundException, AvatarNotExistsException {
 

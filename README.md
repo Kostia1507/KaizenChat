@@ -26,7 +26,6 @@
 {
   "phoneNumber":"...",
   "nickname":"...",
-  "userPhoto":"...",
   "password":"..."
 }
 ```
@@ -351,33 +350,54 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 
 ```json
 {
-  "message": "file is not present"
+  "path": "user/upload-avatar",
+  "message": "file is not present",
+  "statusCode": 400,
+  "timestamp": "2023-04-30T14:32:23.2791826+03:00"
 }
 ```
 
 ```json
 {
-  "message": "file size is greater than 3MB"
+  "path": "user/upload-avatar",
+  "message": "file size is greater than 3MB",
+  "statusCode": 400,
+  "timestamp": "2023-04-30T14:32:23.2791826+03:00"
 }
 ```
 
 ```json
 {
-  "message": "uploaded file is not an image"
+  "path": "user/upload-avatar",
+  "message": "uploaded file is not an image",
+  "statusCode": 400,
+  "timestamp": "2023-04-30T14:32:23.2791826+03:00"
 }
 ```
 
-- 403:
+```json
+{
+    "path": "/user/upload-avatar",
+    "message": "Current request is not a multipart request",
+    "statusCode": 400,
+    "timestamp": "2023-05-03T00:21:20.1633149+03:00"
+}
+```
+
+- 404:
 
 ```json
 {
-  "message": "user is not defined"
+  "path": "user/upload-avatar",
+  "message": "user is not defined",
+  "statusCode": 404,
+  "timestamp": "2023-04-30T14:32:23.2791826+03:00"
 }
 ```
 
 <br/>
 
-**Path:** `http://localhost:8080/user/{userId}/download-avatar`
+**Path:** `http://localhost:8080/user/{userId}/avatar`
 
 **Method:** GET
 
@@ -718,10 +738,10 @@ When Stomp client is created over web-socket he has to connect to the server wit
 
 ```json
 {
-    "path": "/user/duo-chats/24",
-    "message": "DUO-chat:24 was not found",
-    "statusCode": 404,
-    "timestamp": "2023-05-02T19:11:11.3536078+03:00"
+  "path": "/user/duo-chats/24",
+  "message": "DUO-chat:24 was not found",
+  "statusCode": 404,
+  "timestamp": "2023-05-02T19:11:11.3536078+03:00"
 }
 ```
 
