@@ -1,16 +1,10 @@
 package com.example.kaizenchat.controller;
 
-import com.example.kaizenchat.dto.Chat;
-import com.example.kaizenchat.dto.IncomingMessage;
-import com.example.kaizenchat.dto.LastMessagesRequest;
-import com.example.kaizenchat.dto.OutgoingMessage;
+import com.example.kaizenchat.dto.*;
 import com.example.kaizenchat.entity.ChatEntity;
 import com.example.kaizenchat.entity.MessageEntity;
 import com.example.kaizenchat.entity.UserEntity;
-import com.example.kaizenchat.exception.ChatAlreadyExistsException;
-import com.example.kaizenchat.exception.ChatNotFoundException;
-import com.example.kaizenchat.exception.UserNotFoundException;
-import com.example.kaizenchat.exception.UserNotFoundInChatException;
+import com.example.kaizenchat.exception.*;
 import com.example.kaizenchat.model.DuoChat;
 import com.example.kaizenchat.security.jwt.UserDetailsImpl;
 import com.example.kaizenchat.service.ChatService;
@@ -168,6 +162,26 @@ public class DuoChatController {
         } catch (UserNotFoundException | ChatNotFoundException | UserNotFoundInChatException e) {
             log.error("DuoChatController ->  sendMessage: {}", e.getMessage());
         }
+    }
+
+    @Transactional
+    @MessageMapping("/duo-chat/edit}")
+    public void editMessage(@Payload EditMessageRequest request, Authentication auth)
+            throws UserNotFoundException, MessageNotFoundException, UserViolationPermissionsException {
+        var userDetails = (UserDetailsImpl) auth.getPrincipal();
+        Long userId = userDetails.getId();
+        log.info("DuoChatController ->  editMessage(): user-id={}", userId);
+        MessageEntity message = messageService.findMessageById(request.getMessageId())
+                .orElseThrow(MessageNotFoundException::new);
+        messageService.editMessage(userId, request.getMessageId(), request.getBody());
+        OutgoingMessage outgoingMessage = OutgoingMessage.builder()
+                .action(EDIT)
+                .chatId(message.getChat().getId())
+                .body(request.getBody())
+                .messageId(message.getId())
+                .build();
+        template.convertAndSend("/duo-chat/" + message.getChat().getId(), outgoingMessage);
+
     }
 
 
