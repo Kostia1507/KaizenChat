@@ -1,16 +1,10 @@
 package com.example.kaizenchat.controller;
 
-import com.example.kaizenchat.dto.Chat;
-import com.example.kaizenchat.dto.IncomingMessage;
-import com.example.kaizenchat.dto.LastMessagesRequest;
-import com.example.kaizenchat.dto.OutgoingMessage;
+import com.example.kaizenchat.dto.*;
 import com.example.kaizenchat.entity.ChatEntity;
 import com.example.kaizenchat.entity.MessageEntity;
 import com.example.kaizenchat.entity.UserEntity;
-import com.example.kaizenchat.exception.ChatAlreadyExistsException;
-import com.example.kaizenchat.exception.ChatNotFoundException;
-import com.example.kaizenchat.exception.UserNotFoundException;
-import com.example.kaizenchat.exception.UserNotFoundInChatException;
+import com.example.kaizenchat.exception.*;
 import com.example.kaizenchat.model.DuoChat;
 import com.example.kaizenchat.security.jwt.UserDetailsImpl;
 import com.example.kaizenchat.service.ChatService;
@@ -127,8 +121,8 @@ public class DuoChatController {
         try {
             Long chatId = chatService.createDuoChat(userId, id).getId();
             OutgoingMessage message = OutgoingMessage.builder().action(JOIN).chatId(chatId).build();
-            template.convertAndSend("/user/"+id, message);
-            return ResponseEntity.ok().body(Map.of("message", chatId));
+            template.convertAndSend("/user/"+id+"/start", message);
+            return ResponseEntity.ok().body(Map.of("chatId", chatId));
         } catch (UserNotFoundException | ChatAlreadyExistsException e) {
             log.error("DuoChatController ->  startChat: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Something wrong"));
@@ -155,19 +149,54 @@ public class DuoChatController {
     }
 
     @Transactional
-    @MessageMapping("/duo-chat/send/{chatId}")
-    public void sendMessage(@DestinationVariable Long chatId, @Payload IncomingMessage message, Authentication auth){
+    @MessageMapping("/duo-chat/send")
+    public void sendMessage(@Payload IncomingMessage message, Authentication auth){
         var userDetails = (UserDetailsImpl) auth.getPrincipal();
         Long userId = userDetails.getId();
-        log.info("DuoChatController ->  sendMessage(): user-id={} chat-id={}", userId, chatId);
+        log.info("DuoChatController ->  sendMessage(): user-id={} chat-id={}", userId, message.getChatId());
         try {
             UserEntity user = userService.findUserById(userId);
-            messageService.createNewMessage(chatId, userId, message.getBody());
-            var outgoingMessage = new OutgoingMessage(SEND, userId, user.getNickname(), chatId, message.getBody(), now());
-            template.convertAndSend("/duo-chat/" + chatId, outgoingMessage);
+            messageService.createNewMessage(message.getChatId(), userId, message.getBody());
+            var outgoingMessage = new OutgoingMessage(SEND, userId, user.getNickname(), message.getChatId(), message.getBody(), now());
+            template.convertAndSend("/duo-chat/" + message.getChatId(), outgoingMessage);
         } catch (UserNotFoundException | ChatNotFoundException | UserNotFoundInChatException e) {
             log.error("DuoChatController ->  sendMessage: {}", e.getMessage());
         }
+    }
+
+    @Transactional
+    @MessageMapping("/duo-chat/edit}")
+    public void editMessage(@Payload EditMessageRequest request, Authentication auth)
+            throws UserNotFoundException, MessageNotFoundException, UserViolationPermissionsException {
+        var userDetails = (UserDetailsImpl) auth.getPrincipal();
+        Long userId = userDetails.getId();
+        log.info("DuoChatController ->  editMessage(): user-id={}", userId);
+        MessageEntity message = messageService.findMessageById(request.getMessageId())
+                .orElseThrow(MessageNotFoundException::new);
+        messageService.editMessage(userId, request.getMessageId(), request.getBody());
+        OutgoingMessage outgoingMessage = OutgoingMessage.builder()
+                .action(EDIT)
+                .chatId(message.getChat().getId())
+                .body(request.getBody())
+                .messageId(message.getId())
+                .build();
+        template.convertAndSend("/duo-chat/" + message.getChat().getId(), outgoingMessage);
+    }
+
+    @Transactional
+    @MessageMapping("/duo-chat/delete/{messageId}")
+    public void deleteMessage(@DestinationVariable Long messageId, Authentication auth)
+            throws MessageNotFoundException, UserViolationPermissionsException {
+        var userDetails = (UserDetailsImpl) auth.getPrincipal();
+        Long userId = userDetails.getId();
+        Long chatId = messageService.findMessageById(messageId).orElseThrow(MessageNotFoundException::new).getChat().getId();
+        messageService.deleteMessageById(messageId, userId);
+        OutgoingMessage outgoingMessage = OutgoingMessage.builder()
+                .action(DELETE)
+                .chatId(chatId)
+                .messageId(messageId)
+                .build();
+        template.convertAndSend("/duo-chat/" + chatId, outgoingMessage);
     }
 
 
