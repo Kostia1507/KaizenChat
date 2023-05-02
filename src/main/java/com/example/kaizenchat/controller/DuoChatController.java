@@ -30,13 +30,14 @@ import java.util.*;
 import static com.example.kaizenchat.dto.Action.*;
 import static com.example.kaizenchat.model.ChatType.DUO;
 import static java.time.ZonedDateTime.now;
+import static org.springframework.http.HttpStatus.OK;
 
 @Slf4j
 @RestController
 @RequestMapping("/user/duo-chats")
 public class DuoChatController {
 
-    private final int GET_MESSAGES_LIMIT = 50;
+    private static final int GET_MESSAGES_LIMIT = 50;
     private final SimpMessagingTemplate template;
     private final ChatService chatService;
     private final MessageService messageService;
@@ -51,106 +52,72 @@ public class DuoChatController {
         this.userService = userService;
     }
 
+    @ResponseStatus(OK)
     @GetMapping("/all")
-    public ResponseEntity<?> getAllDuoChats() {
-        var userDetails = (UserDetailsImpl) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
-
+    public List<Chat> getAllDuoChats() throws UserNotFoundException {
+        var userDetails = getUserDetails();
         Long userId = userDetails.getId();
         log.info("DuoChatController ->  getAllDuoChats: user-id={}", userId);
-
-        try {
-            List<Chat> chats = chatService.getAllChats(userId, DUO);
-            return ResponseEntity.ok(chats);
-        } catch (UserNotFoundException e) {
-            log.error("DuoChatController ->  getAllDuoChats(): {}", e.getMessage());
-            return ResponseEntity
-                    .status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("message", "user is not found"));
-        }
+        return chatService.getAllChats(userId, DUO);
     }
 
+    @ResponseStatus(OK)
     @GetMapping("/{id}")
-    public ResponseEntity<?> getDuoChatById(@PathVariable Long id) {
-        var userDetails = (UserDetailsImpl) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
-
+    public ChatEntity getDuoChatById(@PathVariable Long id) throws ChatNotFoundException {
+        var userDetails = getUserDetails();
         Long userId = userDetails.getId();
         log.info("DuoChatController ->  getDuoChatById: user-id={}", userId);
-
-        try {
-            ChatEntity chat = chatService.findChatById(id, DUO);
-            return ResponseEntity.ok().body(chat);
-        } catch (ChatNotFoundException e) {
-            log.error("DuoChatController ->  getDuoChatById: {}", e.getMessage());
-            return ResponseEntity
-                    .status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("message", "chat not found"));
-        }
+        return chatService.findChatById(id, DUO);
     }
 
+    @ResponseStatus(OK)
     @GetMapping("/with/{id}")
-    public ResponseEntity<?> getDuoChatWith(@PathVariable Long id) {
-        var userDetails = (UserDetailsImpl) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
-
+    public ChatEntity getDuoChatWith(@PathVariable Long id) throws UserNotFoundException, ChatNotFoundException {
+        var userDetails = getUserDetails();
         Long userId = userDetails.getId();
         log.info("DuoChatController ->  getDuoChatWith: user-id={} with={}", userId, id);
-        try {
-            ChatEntity chat = chatService.findChatByUsers(userId, id);
-            return ResponseEntity.ok(chat);
-        } catch (UserNotFoundException | ChatNotFoundException e) {
-            log.error("DuoChatController ->  getDuoChatWith: {}", e.getMessage());
-            return ResponseEntity
-                    .status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("message", e.getMessage()));
-        }
+        return chatService.findChatByUsers(userId, id);
     }
 
+    @ResponseStatus(OK)
     @GetMapping("/start/{id}")
-    public ResponseEntity<Map<String, Object>> startChat(@PathVariable Long id) {
-        var userDetails = (UserDetailsImpl) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
-
+    public Map<String, Object> startChat(@PathVariable Long id) throws UserNotFoundException, ChatAlreadyExistsException {
+        var userDetails = getUserDetails();
         Long userId = userDetails.getId();
         log.info("DuoChatController ->  startChat(): user-id={} destination-id={}", userId, id);
-        try {
-            Long chatId = chatService.createDuoChat(userId, id).getId();
-            OutgoingMessage message = OutgoingMessage.builder().action(JOIN).chatId(chatId).build();
-            template.convertAndSend("/user/"+id+"/start", message);
-            return ResponseEntity.ok().body(Map.of("chatId", chatId));
-        } catch (UserNotFoundException | ChatAlreadyExistsException e) {
-            log.error("DuoChatController ->  startChat: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Something wrong"));
-        }
+
+        Long chatId = chatService.createDuoChat(userId, id).getId();
+        OutgoingMessage message = OutgoingMessage.builder().action(JOIN).chatId(chatId).build();
+        template.convertAndSend("/user/" + id + "/start", message);
+        return Map.of("chatId", chatId);
     }
 
     @PostMapping("/messages")
     public ResponseEntity<Map<String, Object>> getLastMessages(@Valid @RequestBody LastMessagesRequest request) throws ChatNotFoundException, UserNotFoundInChatException {
-        var userDetails = (UserDetailsImpl) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
+        var userDetails = getUserDetails();
         Long userId = userDetails.getId();
         log.info("DuoChatController ->  getLastMessages(): user-id={}", userId);
         Set<UserEntity> users = chatService.findChatById(request.getChatId(), DUO).getUsers();
-        if(users.stream().anyMatch(member -> member.getId().equals(userId))){
+        if (users.stream().anyMatch(member -> member.getId().equals(userId))) {
             List<MessageEntity> messages;
-            if(request.getTime() == null)
+            if (request.getTime() == null)
                 messages = messageService.getLastMessages(request.getChatId(), GET_MESSAGES_LIMIT);
             else
                 messages = messageService.getLastMessages(request.getChatId(), request.getTime(), GET_MESSAGES_LIMIT);
             return ResponseEntity.ok().body(Map.of("messages", messages));
-        }else
+        } else
             throw new UserNotFoundInChatException("not member of chat");
+    }
+
+    public UserDetailsImpl getUserDetails() {
+        return (UserDetailsImpl) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
     }
 
     @Transactional
     @MessageMapping("/duo-chat/send")
-    public void sendMessage(@Payload IncomingMessage message, Authentication auth){
+    public void sendMessage(@Payload IncomingMessage message, Authentication auth) {
         var userDetails = (UserDetailsImpl) auth.getPrincipal();
         Long userId = userDetails.getId();
         log.info("DuoChatController ->  sendMessage(): user-id={} chat-id={}", userId, message.getChatId());

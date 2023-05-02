@@ -30,7 +30,8 @@ public class CustomExceptionHandler {
     @ResponseStatus(FORBIDDEN)
     @ExceptionHandler({
             BadCredentialsException.class,
-            InvalidRequestDataException.class
+            InvalidRequestDataException.class,
+            ChatAlreadyExistsException.class
     })
     public ApiError handleExceptionWithForbidden(Exception e, HttpServletRequest request) {
         log.error("IN CustomExHandler [403] ->  handleExWithForbidden(): path={} , {}", request.getRequestURI(), e.getMessage());
