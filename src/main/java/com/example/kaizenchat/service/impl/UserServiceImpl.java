@@ -39,6 +39,8 @@ import static java.lang.String.format;
 @Service
 public class UserServiceImpl implements UserService {
 
+    private final static String DEFAULT_USER_AVATAR_PATH = "src\\main\\resources\\images\\user_default_av.png";
+
     private final JWTProvider jwtProvider;
 
     private final UserRepository userRepository;
@@ -102,7 +104,7 @@ public class UserServiceImpl implements UserService {
                 .phoneNumber(request.getPhoneNumber())
                 .nickname(request.getNickname())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .avatar(request.getUserPhoto())
+                .avatar(DEFAULT_USER_AVATAR_PATH)
                 .roles(roles)
                 .registration(ZonedDateTime.now())
                 .refreshToken(tokenPair.get("refreshToken"))
