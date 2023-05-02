@@ -9,17 +9,15 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.time.ZonedDateTime.now;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
+import static org.springframework.http.HttpStatus.OK;
 
 @Slf4j
 @RestController
@@ -33,15 +31,11 @@ public class AuthController {
         this.userService = userService;
     }
 
+    @ResponseStatus(OK)
     @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> register(@Valid @RequestBody UserRegistrationRequest request) {
-        log.info("IN AuthController register(): body {}", request);
-        try {
-            return ResponseEntity.ok(userService.register(request));
-        } catch (BadCredentialsException e) {
-            log.info("IN AuthController -> register(): invalid request data");
-            return ResponseEntity.status(FORBIDDEN).body(Map.of("message", "invalid request"));
-        }
+    public Map<String, String> register(@Valid @RequestBody UserRegistrationRequest request) {
+        log.info("IN AuthController register(): phone=[{}]", request.getPhoneNumber());
+        return userService.register(request);
     }
 
     @PostMapping("/login")
@@ -52,17 +46,16 @@ public class AuthController {
             return ResponseEntity.ok(responseBody);
         } catch (UsernameNotFoundException | InvalidRequestDataException e) {
             log.info("IN AuthController -> login(): invalid request data");
-            return ResponseEntity.status(FORBIDDEN).body(Map.of("isRegistered", "false"));
+            return ResponseEntity.status(FORBIDDEN).body(Map.of("isLoggedIn", "false"));
         }
     }
 
+    @ResponseStatus(OK)
     @PostMapping("/refresh")
-    public ResponseEntity<Map<String, String>> refresh(@Valid @RequestBody RefreshTokenRequest request) {
-        try {
-            return ResponseEntity.ok(userService.refreshTokens(request.getOldRefreshToken()));
-        } catch (InvalidRequestDataException e) {
-            log.info("IN AuthController -> refresh(): invalid request data");
-            return ResponseEntity.status(FORBIDDEN).body(Map.of("message", "wrong refresh token"));
-        }
+    public Map<String, String> refresh(@Valid @RequestBody RefreshTokenRequest request)
+            throws InvalidRequestDataException {
+
+        log.info("IN AuthController -> refresh(): {}", now());
+        return userService.refreshTokens(request.getOldRefreshToken());
     }
 }

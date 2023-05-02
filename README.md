@@ -48,9 +48,9 @@
 
 ```json
 {
-    "password": "length should be 8 or longer",
-    "phoneNumber": "length should be 13",
-    "nickname": "should not be blank"
+  "password": "length should be 8 or longer",
+  "phoneNumber": "length should be 13",
+  "nickname": "should not be blank"
 }
 ```
 
@@ -58,7 +58,10 @@
 
 ```json
 {
-  "message": "invalid request"
+  "path": "/auth/register",
+  "message": "Such phone-number already exists",
+  "statusCode": 403,
+  "timestamp": "2023-05-02T19:19:42.7020063+03:00"
 }
 ```
 
@@ -119,7 +122,7 @@
 
 ```json
 {
-  "isRegistered": "false"
+  "isLoggedIn": "false"
 }
 ```
 
@@ -166,11 +169,14 @@
 }
 ```
 
-- 403:
+- 404:
 
 ```json
 {
-  "message": "wrong refresh token"
+  "path": "/auth/refresh",
+  "message": "refresh token was not found",
+  "statusCode": 404,
+  "timestamp": "2023-05-02T19:20:34.7733007+03:00"
 }
 ```
 
@@ -594,11 +600,14 @@ When Stomp client is created over web-socket he has to connect to the server wit
 }
 ```
 
-- 403:
+- 404:
 
 ```json
 {
-  "message": "Something wrong"
+  "path": "/user/duo-chats/start/545",
+  "message": "user with id:545 not found",
+  "statusCode": 404,
+  "timestamp": "2023-05-02T19:54:35.1147599+03:00"
 }
 ```
 
@@ -606,11 +615,11 @@ When Stomp client is created over web-socket he has to connect to the server wit
 
 ---
 
-### Get all duo chats 
+### Get all duo chats
 
 <details>
 
-**Path:** `http://localhost:8080/user/duo-chats/{chatId}`
+**Path:** `http://localhost:8080/user/duo-chats/all`
 
 **Method:** GET
 
@@ -682,11 +691,14 @@ When Stomp client is created over web-socket he has to connect to the server wit
 }
 ```
 
-- 403:
+- 404:
 
 ```json
 {
-  "message": "chat not found"
+    "path": "/user/duo-chats/24",
+    "message": "DUO-chat:24 was not found",
+    "statusCode": 404,
+    "timestamp": "2023-05-02T19:11:11.3536078+03:00"
 }
 ```
 
@@ -735,11 +747,14 @@ When Stomp client is created over web-socket he has to connect to the server wit
 }
 ```
 
-- 403:
+- 404:
 
 ```json
 {
-  "message": "duo-chat between [1, 2] was not found"
+  "path": "/user/duo-chats/with/3",
+  "message": "duo-chat between [8, 3] was not found",
+  "statusCode": 404,
+  "timestamp": "2023-05-02T19:17:07.9071073+03:00"
 }
 ```
 
@@ -798,9 +813,9 @@ Time can be null
 
 ```json
 {
-    "password": "length should be 8 or longer",
-    "phoneNumber": "length should be 13",
-    "nickname": "should not be blank"
+  "password": "length should be 8 or longer",
+  "phoneNumber": "length should be 13",
+  "nickname": "should not be blank"
 }
 ```
 

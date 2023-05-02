@@ -74,7 +74,7 @@ public class UserServiceImpl implements UserService {
 
         UserEntity user = userRepository
                 .findByRefreshToken(oldRefreshToken)
-                .orElseThrow(InvalidRequestDataException::new);
+                .orElseThrow(() -> new InvalidRequestDataException("refresh token was not found"));
 
         // update refresh token
         Map<String, String> tokens = generatesTokens(user.getNickname(), user.getPhoneNumber());
