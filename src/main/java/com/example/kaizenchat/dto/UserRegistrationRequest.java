@@ -22,9 +22,6 @@ public class UserRegistrationRequest {
     private String nickname;
 
     @NotBlank(message = "should not be blank")
-    private String userPhoto;
-
-    @NotBlank(message = "should not be blank")
     @Size(min = 8, message = "length should be 8 or longer")
     private String password;
 
