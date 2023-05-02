@@ -600,11 +600,14 @@ When Stomp client is created over web-socket he has to connect to the server wit
 }
 ```
 
-- 403:
+- 404:
 
 ```json
 {
-  "message": "Something wrong"
+  "path": "/user/duo-chats/start/545",
+  "message": "user with id:545 not found",
+  "statusCode": 404,
+  "timestamp": "2023-05-02T19:54:35.1147599+03:00"
 }
 ```
 
