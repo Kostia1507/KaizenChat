@@ -306,7 +306,7 @@
 
 ```json
 {
-    "nickname": "length should be 4 or longer"
+  "nickname": "length should be 4 or longer"
 }
 ```
 
@@ -350,9 +350,20 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 
 ```json
 {
+  "path": "/user/upload-avatar",
+  "message": "Current request is not a multipart request",
+  "statusCode": 400,
+  "timestamp": "2023-05-03T00:21:20.1633149+03:00"
+}
+```
+
+- 403:
+
+```json
+{
   "path": "user/upload-avatar",
   "message": "file is not present",
-  "statusCode": 400,
+  "statusCode": 403,
   "timestamp": "2023-04-30T14:32:23.2791826+03:00"
 }
 ```
@@ -361,7 +372,7 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 {
   "path": "user/upload-avatar",
   "message": "file size is greater than 3MB",
-  "statusCode": 400,
+  "statusCode": 403,
   "timestamp": "2023-04-30T14:32:23.2791826+03:00"
 }
 ```
@@ -370,17 +381,8 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 {
   "path": "user/upload-avatar",
   "message": "uploaded file is not an image",
-  "statusCode": 400,
+  "statusCode": 403,
   "timestamp": "2023-04-30T14:32:23.2791826+03:00"
-}
-```
-
-```json
-{
-    "path": "/user/upload-avatar",
-    "message": "Current request is not a multipart request",
-    "statusCode": 400,
-    "timestamp": "2023-05-03T00:21:20.1633149+03:00"
 }
 ```
 
@@ -420,7 +422,13 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 
 - 404
 
-<br/>
+</details>
+
+---
+
+## Group chats
+
+<details>
 
 **Path:** `http://localhost:8080/user/group-chats/all`
 
@@ -459,9 +467,101 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 }
 ```
 
-</details>
+<br/>
 
----
+**Path:** `http://localhost:8080/user/group-chats/{chatId}/avatar`
+
+**Method:** GET
+
+**Authorization header format:** `Bearer [access token]`
+
+**Responses:**
+
+- 200:
+
+```
+[image]
+```
+
+- 404:
+
+```json
+{
+    "path": "/user/group-chats/4/avatar",
+    "message": "GROUP-chat:4 was not found",
+    "statusCode": 404,
+    "timestamp": "2023-05-03T19:05:42.0903724+03:00"
+}
+```
+
+<br/>
+
+**Path:** `http://localhost:8080/user/group-chats/{chatId}/upload-avatar`
+
+**Method:** POST
+
+**Format:** form-data
+
+**Body:**
+
+```
+key: "avatar"
+value: image (jpeg, jpg, png, up to 3 megabytes)
+```
+
+**Responses:**
+
+- 200:
+
+```json
+{
+  "message": "updated"
+}
+```
+
+- 400:
+
+```json
+{
+    "path": "/user/group-chats/4/upload-avatar",
+    "message": "Current request is not a multipart request",
+    "statusCode": 400,
+    "timestamp": "2023-05-03T19:14:39.1494308+03:00"
+}
+```
+
+- 403:
+
+```json
+{
+    "path": "/user/group-chats/1/upload-avatar",
+    "message": "Maximum upload size exceeded",
+    "statusCode": 403,
+    "timestamp": "2023-05-03T19:20:05.9171878+03:00"
+}
+```
+
+```json
+{
+    "path": "/user/group-chats/1/upload-avatar",
+    "message": "uploaded file is not an image",
+    "statusCode": 403,
+    "timestamp": "2023-05-03T19:26:05.9963992+03:00"
+}
+```
+
+- 404:
+
+```json
+{
+    "path": "/user/group-chats/4/upload-avatar",
+    "message": "GROUP-chat:4 was not found",
+    "statusCode": 404,
+    "timestamp": "2023-05-03T19:19:09.0560148+03:00"
+}
+```
+
+</details>
 
 <br/>
 
