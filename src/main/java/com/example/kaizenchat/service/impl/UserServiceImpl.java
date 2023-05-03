@@ -12,6 +12,7 @@ import com.example.kaizenchat.repository.RoleRepository;
 import com.example.kaizenchat.repository.UserRepository;
 import com.example.kaizenchat.security.jwt.JWTProvider;
 import com.example.kaizenchat.service.UserService;
+import com.example.kaizenchat.utils.AvatarUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -148,7 +149,7 @@ public class UserServiceImpl implements UserService {
         String filename = String.format("img-%d_%d.%s",
                 userId, Instant.now().toEpochMilli(), getFileExtension(avatar));
 
-        Path destination = getImageDestination(filename);
+        Path destination = AvatarUtils.getImageDestination(filename);
 
         try {
             avatar.transferTo(destination);
@@ -165,22 +166,15 @@ public class UserServiceImpl implements UserService {
         log.info("IN UserService -> downloadAvatar()");
         UserEntity user = findUserById(userId);
         try {
-            Path path = Path.of(user.getAvatar());
-            String pathString = path.toString();
+            String avatarPath = user.getAvatar();
+            byte[] bytes = AvatarUtils.getImage(avatarPath);
+            MediaType type = AvatarUtils.getImageType(avatarPath);
 
-            String ext = pathString.substring(pathString.lastIndexOf(".") + 1);
-            MediaType type = MediaType.valueOf("images/" + ext);
-            byte[] bytes = Files.readAllBytes(path);
-
-            return new Avatar(pathString, type, bytes);
+            return new Avatar(avatarPath, type, bytes);
         } catch (IOException e) {
             log.error("IN UserService -> downloadAvatar(): {}", e.getMessage());
             throw new AvatarNotExistsException(format("avatar for user:%d was not found", userId), e);
         }
-    }
-
-    private Path getImageDestination(String filename) {
-        return Path.of("src", "main", "resources", "images", filename);
     }
 
     private Map<String, String> generatesTokens(String nickname, String phoneNumber) {

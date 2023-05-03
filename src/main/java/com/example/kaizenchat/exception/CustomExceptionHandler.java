@@ -34,14 +34,8 @@ public class CustomExceptionHandler {
             ChatAlreadyExistsException.class
     })
     public ApiError handleExceptionWithForbidden(Exception e, HttpServletRequest request) {
-        log.error("IN CustomExHandler ->  handleExWithForbidden(): path={} , {}", request.getRequestURI(), e.getMessage());
-        boolean isBadCredEx = e instanceof BadCredentialsException;
-        return new ApiError(
-                request.getRequestURI(),
-                e.getMessage(),
-                (isBadCredEx ? BAD_REQUEST : FORBIDDEN).value(),
-                now()
-        );
+        log.error("IN CustomExHandler [403] ->  handleExWithForbidden(): path={} , {}", request.getRequestURI(), e.getMessage());
+        return new ApiError(request.getRequestURI(), e.getMessage(), FORBIDDEN.value(), now());
     }
 
     @ResponseStatus(BAD_REQUEST)
