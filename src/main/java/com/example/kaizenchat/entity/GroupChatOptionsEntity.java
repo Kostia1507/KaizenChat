@@ -23,6 +23,8 @@ public class GroupChatOptionsEntity {
 
     private String password;
 
+    private String avatar;
+
     @Column(name = "members_limit")
     private Integer membersLimit;
 
