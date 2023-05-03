@@ -4,10 +4,8 @@ import com.example.kaizenchat.dto.*;
 import com.example.kaizenchat.entity.ChatEntity;
 import com.example.kaizenchat.entity.MessageEntity;
 import com.example.kaizenchat.entity.UserEntity;
-import com.example.kaizenchat.exception.ChatNotFoundException;
-import com.example.kaizenchat.exception.UserNotFoundException;
-import com.example.kaizenchat.exception.UserNotFoundInChatException;
-import com.example.kaizenchat.exception.UserViolationPermissionsException;
+import com.example.kaizenchat.exception.*;
+import com.example.kaizenchat.model.Avatar;
 import com.example.kaizenchat.security.jwt.UserDetailsImpl;
 import com.example.kaizenchat.service.ChatService;
 import com.example.kaizenchat.service.MessageService;
@@ -26,21 +24,25 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
 
 import static com.example.kaizenchat.dto.Action.*;
 import static com.example.kaizenchat.model.ChatType.GROUP;
+import static com.example.kaizenchat.utils.MultipartFileUtils.validate;
 import static java.lang.String.format;
 import static java.time.ZonedDateTime.now;
+import static java.util.Map.of;
+import static org.springframework.http.HttpStatus.OK;
 
 @Slf4j
 @RestController
 @RequestMapping("/user/group-chats")
 public class GroupChatController {
 
-    private final int GET_MESSAGES_LIMIT = 50;
+    private static final int GET_MESSAGES_LIMIT = 50;
     private final SimpMessagingTemplate template;
     private final ChatService chatService;
     private final MessageService messageService;
@@ -179,4 +181,36 @@ public class GroupChatController {
         }else
             throw new UserNotFoundInChatException("not member of chat");
     }
+
+    @ResponseStatus(OK)
+    @PostMapping("/{chatId}/upload-avatar")
+    public Map<String, String> uploadAvatar(@RequestParam("avatar") MultipartFile file,
+                                            @PathVariable Long chatId)
+            throws UserViolationPermissionsException, UserNotFoundException,
+            ChatNotFoundException, AvatarNotExistsException {
+
+        log.info("IN GroupChatController -> uploadAvatar(): file-size={} bytes", file.getSize());
+
+        validate(file);
+
+        var userDetails = (UserDetailsImpl) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        chatService.uploadAvatar(file, chatId, userDetails.getId());
+        return of("message", "updated");
+    }
+
+    @GetMapping("/{chatId}/avatar")
+    public ResponseEntity<byte[]> downloadAvatar(@PathVariable Long chatId)
+            throws ChatNotFoundException, AvatarNotExistsException {
+
+        log.info("IN GroupChatController -> downloadAvatar(): chat-id={}", chatId);
+        Avatar avatar = chatService.downloadAvatar(chatId);
+        return ResponseEntity.ok()
+                .contentType(avatar.contentType())
+                .body(avatar.bytes());
+    }
+
 }
