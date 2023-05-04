@@ -141,6 +141,29 @@ public class GroupChatController {
         log.error("EXCEPTION: {}", e.getMessage());
     }
 
+    @Transactional
+    @MessageMapping("/edit")
+    public void editMessage(@Payload EditMessageRequest request, Authentication auth)
+            throws UserNotFoundException, UserViolationPermissionsException {
+        var userDetails = (UserDetailsImpl) auth.getPrincipal();
+        Long userId = userDetails.getId();
+        log.info("GroupChatController ->  editMessage(): user-id={}", userId);
+        try {
+            MessageEntity message = messageService.findMessageById(request.getMessageId())
+                    .orElseThrow(MessageNotFoundException::new);
+            messageService.editMessage(userId, request.getMessageId(), request.getBody());
+            OutgoingMessage outgoingMessage = OutgoingMessage.builder()
+                    .action(EDIT)
+                    .chatId(message.getChat().getId())
+                    .body(request.getBody())
+                    .messageId(message.getId())
+                    .build();
+            template.convertAndSend("/chatroom/" + message.getChat().getId(), outgoingMessage);
+        }catch(MessageNotFoundException e){
+            log.error("GroupChatController ->  editMessage(): {}", e.getMessage());
+        }
+    }
+
     @GetMapping("/all")
     public ResponseEntity<?> getAllChats() {
         var userDetails = (UserDetailsImpl) SecurityContextHolder.getContext()
