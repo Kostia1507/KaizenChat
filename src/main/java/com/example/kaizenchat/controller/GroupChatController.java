@@ -164,6 +164,28 @@ public class GroupChatController {
         }
     }
 
+    @Transactional
+    @MessageMapping("delete/{messageId}")
+    public void deleteMessage(@DestinationVariable Long messageId, Authentication auth) {
+        var userDetails = (UserDetailsImpl) auth.getPrincipal();
+        Long userId = userDetails.getId();
+        try {
+            MessageEntity message = messageService.findMessageById(messageId).orElseThrow(MessageNotFoundException::new);
+            UserEntity user = userService.findUserById(userId);
+            if(userId.equals(message.getSender().getId())||chatService.isUserAdminInGroupChat(user,message.getChat())){
+                messageService.deleteMessageById(messageId, userId);
+                OutgoingMessage outgoingMessage = OutgoingMessage.builder()
+                        .action(DELETE)
+                        .chatId(message.getChat().getId())
+                        .messageId(messageId)
+                        .build();
+                template.convertAndSend("/chatroom/" + message.getChat().getId(), outgoingMessage);
+            }
+        } catch (MessageNotFoundException | UserNotFoundException | UserViolationPermissionsException e) {
+            log.error("GroupChatController ->  deleteMessage(): {}", e.getMessage());
+        }
+    }
+
     @GetMapping("/all")
     public ResponseEntity<?> getAllChats() {
         var userDetails = (UserDetailsImpl) SecurityContextHolder.getContext()
