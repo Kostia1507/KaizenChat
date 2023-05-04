@@ -6,8 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.time.ZonedDateTime;
-
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -16,5 +14,5 @@ public class KickMemberRequest {
     @NotNull(message= "should be not null")
     private Long chatId;
     @NotNull(message= "should be not null")
-    private ZonedDateTime userId;
+    private Long userId;
 }
