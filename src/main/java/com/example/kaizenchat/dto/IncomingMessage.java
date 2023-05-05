@@ -1,16 +1,15 @@
 package com.example.kaizenchat.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class RefreshTokenRequest {
-
-    @NotBlank(message = "should not be blank")
-    private String oldRefreshToken;
-
+@ToString
+public class IncomingMessage {
+    private Long chatId;
+    private String body;
 }

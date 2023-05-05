@@ -4,19 +4,28 @@ import com.example.kaizenchat.dto.UserLoginRequest;
 import com.example.kaizenchat.dto.UserRegistrationRequest;
 import com.example.kaizenchat.entity.RoleEntity;
 import com.example.kaizenchat.entity.UserEntity;
+import com.example.kaizenchat.exception.AvatarNotExistsException;
 import com.example.kaizenchat.exception.InvalidRequestDataException;
 import com.example.kaizenchat.exception.UserNotFoundException;
+import com.example.kaizenchat.model.Avatar;
 import com.example.kaizenchat.repository.RoleRepository;
 import com.example.kaizenchat.repository.UserRepository;
 import com.example.kaizenchat.security.jwt.JWTProvider;
 import com.example.kaizenchat.service.UserService;
+import com.example.kaizenchat.utils.AvatarUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Map;
@@ -24,10 +33,14 @@ import java.util.Set;
 
 import static com.example.kaizenchat.security.jwt.JWTType.ACCESS;
 import static com.example.kaizenchat.security.jwt.JWTType.REFRESH;
+import static com.example.kaizenchat.utils.MultipartFileUtils.getFileExtension;
+import static java.lang.String.format;
 
 @Slf4j
 @Service
 public class UserServiceImpl implements UserService {
+
+    private final static String DEFAULT_USER_AVATAR_PATH = "src\\main\\resources\\images\\user_default_av.png";
 
     private final JWTProvider jwtProvider;
 
@@ -48,7 +61,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserEntity findUserById(Long id) throws UserNotFoundException {
-        return userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+        return userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(format("user with id:%d not found", id)));
+    }
+
+    @Override
+    public UserEntity findUserByPhoneNumber(String phoneNumber) throws UserNotFoundException {
+        return userRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UserNotFoundException(format("user with phone-number:[%s] not found", phoneNumber)));
     }
 
     @Override
@@ -57,7 +77,7 @@ public class UserServiceImpl implements UserService {
 
         UserEntity user = userRepository
                 .findByRefreshToken(oldRefreshToken)
-                .orElseThrow(InvalidRequestDataException::new);
+                .orElseThrow(() -> new InvalidRequestDataException("refresh token was not found"));
 
         // update refresh token
         Map<String, String> tokens = generatesTokens(user.getNickname(), user.getPhoneNumber());
@@ -85,7 +105,7 @@ public class UserServiceImpl implements UserService {
                 .phoneNumber(request.getPhoneNumber())
                 .nickname(request.getNickname())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .avatar(request.getUserPhoto())
+                .avatar(DEFAULT_USER_AVATAR_PATH)
                 .roles(roles)
                 .registration(ZonedDateTime.now())
                 .refreshToken(tokenPair.get("refreshToken"))
@@ -111,6 +131,50 @@ public class UserServiceImpl implements UserService {
         user.setRefreshToken(tokens.get("refreshToken"));
         userRepository.save(user);
         return tokens;
+    }
+
+    @Override
+    public void updateUser(Long userId, String nickname, String avatar, String bio) throws UserNotFoundException {
+        UserEntity user = findUserById(userId);
+        user.setNickname(nickname != null ? nickname : user.getNickname());
+        user.setAvatar(avatar != null ? avatar : user.getAvatar());
+        user.setBio(bio != null ? bio : user.getBio());
+        userRepository.save(user);
+    }
+
+    @Override
+    public boolean updateAvatar(MultipartFile avatar, Long userId) {
+        log.info("IN UserService -> updateAvatar()");
+
+        String filename = String.format("img-%d_%d.%s",
+                userId, Instant.now().toEpochMilli(), getFileExtension(avatar));
+
+        Path destination = AvatarUtils.getImageDestination(filename);
+
+        try {
+            avatar.transferTo(destination);
+            updateUser(userId, null, destination.toString(), null);
+            return true;
+        } catch (IOException | UserNotFoundException e) {
+            log.error("IN UserService -> updateAvatar(): {}", e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public Avatar downloadAvatar(Long userId) throws UserNotFoundException, AvatarNotExistsException {
+        log.info("IN UserService -> downloadAvatar()");
+        UserEntity user = findUserById(userId);
+        try {
+            String avatarPath = user.getAvatar();
+            byte[] bytes = AvatarUtils.getImage(avatarPath);
+            MediaType type = AvatarUtils.getImageType(avatarPath);
+
+            return new Avatar(avatarPath, type, bytes);
+        } catch (IOException e) {
+            log.error("IN UserService -> downloadAvatar(): {}", e.getMessage());
+            throw new AvatarNotExistsException(format("avatar for user:%d was not found", userId), e);
+        }
     }
 
     private Map<String, String> generatesTokens(String nickname, String phoneNumber) {

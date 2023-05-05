@@ -1,6 +1,7 @@
 package com.example.kaizenchat.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,14 +12,15 @@ import lombok.ToString;
 @AllArgsConstructor
 @Getter
 @ToString
-public class UserLoginRequest {
+public class UserUpdateRequest {
+
+    @NotNull(message = "should not be null")
+    private Long id;
 
     @NotBlank(message = "should not be blank")
-    @Size(min = 13, max = 13, message = "length should be 13")
-    private String phoneNumber;
+    @Size(min = 4, message = "length should be 4 or longer")
+    private String nickname;
 
-    @NotBlank(message = "should not be blank")
-    @Size(min = 8, message = "length should be 8 or longer")
-    private String password;
+    private String bio;
 
 }

@@ -1,15 +1,15 @@
 package com.example.kaizenchat.service.impl;
 
 import com.example.kaizenchat.dto.AddMemberToChatRequest;
+import com.example.kaizenchat.dto.Chat;
 import com.example.kaizenchat.dto.DuoChatCreationRequest;
 import com.example.kaizenchat.dto.GroupChatCreationRequest;
 import com.example.kaizenchat.entity.ChatEntity;
 import com.example.kaizenchat.entity.GroupChatOptionsEntity;
+import com.example.kaizenchat.entity.MessageEntity;
 import com.example.kaizenchat.entity.UserEntity;
-import com.example.kaizenchat.exception.ChatAlreadyExistsException;
-import com.example.kaizenchat.exception.ChatNotFoundException;
-import com.example.kaizenchat.exception.UserNotFoundException;
-import com.example.kaizenchat.exception.UserViolationPermissionsException;
+import com.example.kaizenchat.exception.*;
+import com.example.kaizenchat.model.Avatar;
 import com.example.kaizenchat.model.ChatType;
 import com.example.kaizenchat.model.DuoChat;
 import com.example.kaizenchat.model.GroupChat;
@@ -18,18 +18,27 @@ import com.example.kaizenchat.repository.GroupChatOptionsRepository;
 import com.example.kaizenchat.repository.UserRepository;
 import com.example.kaizenchat.service.ChatService;
 import com.example.kaizenchat.service.UserService;
+import com.example.kaizenchat.utils.AvatarUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import static com.example.kaizenchat.model.ChatType.DUO;
 import static com.example.kaizenchat.model.ChatType.GROUP;
+import static com.example.kaizenchat.utils.MultipartFileUtils.getFileExtension;
 import static java.lang.String.format;
+import static java.util.Comparator.comparing;
 
 @Slf4j
 @Service
@@ -58,7 +67,7 @@ public class ChatServiceImpl implements ChatService {
     public ChatEntity findChatById(Long id, ChatType type) throws ChatNotFoundException {
         Optional<ChatEntity> chatOpt = chatRepository.findById(id);
         if (chatOpt.isEmpty() || (chatOpt.get().isGroupChat() && type.equals(DUO))) {
-            throw new ChatNotFoundException();
+            throw new ChatNotFoundException(format("%s-chat:%d was not found", type.name(), id));
         }
         return chatOpt.get();
     }
@@ -79,7 +88,16 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public DuoChat createDuoChat(DuoChatCreationRequest request, Long fromUserId, Long toUserId)
+    public ChatEntity findChatByUsers(Long firstUserId, Long secondUserId) throws ChatNotFoundException {
+        Long chatId = chatRepository.findDuoChatByUsers(firstUserId, secondUserId)
+                .orElseThrow(() -> new ChatNotFoundException(
+                        format("duo-chat between [%d, %d] was not found", firstUserId, secondUserId)
+                ));
+        return findChatById(chatId, DUO);
+    }
+
+    @Override
+    public DuoChat createDuoChat(Long fromUserId, Long toUserId)
             throws UserNotFoundException, ChatAlreadyExistsException {
 
         log.info("IN ChatService -> createDuoChat(): between users id:{} <-> id:{}", fromUserId, toUserId);
@@ -142,7 +160,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public void addUserToGroupChat(AddMemberToChatRequest request, Long userId)
+    public boolean addUserToGroupChat(AddMemberToChatRequest request, Long userId)
             throws ChatNotFoundException, UserNotFoundException, UserViolationPermissionsException {
 
         log.info("IN ChatService -> addUserToGroupChat(): chat-id:{} user-id:{}", request.getChatId(), userId);
@@ -169,12 +187,48 @@ public class ChatServiceImpl implements ChatService {
 
         if (isMemberInGroupChat(user, chat)) {
             log.info("IN ChatService -> addUserToGroupChat(): user-id:{} already in chat-id:{}", userId, request.getChatId());
-            return;
+            return false;
         }
         // save user to chat
         chatRepository.addUserToGroupChat(chat.getId(), userId);
         groupChatOptions.setMembersCount(membersCount + 1);
         groupChatOptionsRepository.save(groupChatOptions);
+        return true;
+    }
+
+    @Override
+    public List<Chat> getAllChats(Long userId, ChatType type) throws UserNotFoundException {
+        UserEntity user = userService.findUserById(userId);
+        log.info("IN ChatService -> getAllChats(): user-id={}", user.getId());
+
+        Set<ChatEntity> chats = type.equals(GROUP) ? user.getGroupChats() : user.getDuoChats();
+        return chats.stream()
+                .map(this::getChatWithLastMessage)
+                .filter(chat -> chat.getLastMessage() != null)
+                .sorted(comparing(Chat::getLastMessageTime).reversed())
+                .toList();
+    }
+
+    private Chat getChatWithLastMessage(ChatEntity chat) {
+        Set<MessageEntity> lastMessages = chat.getMessages();
+        log.info("IN ChatService -> getChatWithLastMessage(): chat-id={} list size={}", chat.getId(), lastMessages.size());
+
+        if (lastMessages.isEmpty()) {
+            return new Chat(chat.getId(), null, null, null, null);
+        }
+
+        MessageEntity lastMessage = lastMessages.stream()
+                .max(comparing(MessageEntity::getTime))
+                .orElse(new MessageEntity());
+
+        UserEntity sender = lastMessage.getSender();
+        return new Chat(
+                chat.getId(),
+                sender.getId(),
+                sender.getNickname(),
+                lastMessage.getBody(),
+                lastMessage.getTime()
+        );
     }
 
     @Override
@@ -197,6 +251,7 @@ public class ChatServiceImpl implements ChatService {
             throws UserViolationPermissionsException {
 
         log.info("IN ChatService -> kickFromGroupChat(): chat-id:{} user-id:{}", chat.getId(), user.getId());
+
         if (!isUserAdminInGroupChat(admin, chat)) {
             String message = format("user-id:%d is not admin in chat-id:%d", admin.getId(), chat.getId());
             log.error("IN ChatService -> kickFromGroupChat(): {}", message);
@@ -204,6 +259,12 @@ public class ChatServiceImpl implements ChatService {
         }
 
         // save changes
+        deleteUser(chat, user);
+    }
+
+    @Override
+    public void deleteUser(ChatEntity chat, UserEntity user) {
+        log.info("IN ChatService -> deleteUser(): chat-id:{} user-id:{}", chat.getId(), user.getId());
         chat.getUsers().remove(user);
         var chatOptions = chat.getGroupChatOptions();
         chatOptions.setMembersCount(chatOptions.getMembersCount() - 1);
@@ -212,4 +273,53 @@ public class ChatServiceImpl implements ChatService {
         userRepository.save(user);
         groupChatOptionsRepository.save(chatOptions);
     }
+
+    @Override
+    public void uploadAvatar(MultipartFile avatar, Long chatId, Long userId)
+            throws
+            UserViolationPermissionsException, UserNotFoundException,
+            ChatNotFoundException, AvatarNotExistsException {
+
+        log.info("IN ChatService -> updateAvatar()");
+
+        try {
+            UserEntity user = userService.findUserById(userId);
+            ChatEntity chat = findChatById(chatId, GROUP);
+
+            if (!isUserAdminInGroupChat(user, chat)) {
+                throw new UserViolationPermissionsException("only admin can change avatar");
+            }
+
+            String filename = String.format("chat-img-%d_%d.%s",
+                    chatId, Instant.now().toEpochMilli(), getFileExtension(avatar));
+
+            Path destination = AvatarUtils.getImageDestination(filename);
+            avatar.transferTo(destination);
+
+            // save path to chat options
+            GroupChatOptionsEntity chatOptions = chat.getGroupChatOptions();
+            chatOptions.setAvatar(destination.toString());
+            groupChatOptionsRepository.save(chatOptions);
+        } catch (IOException e) {
+            log.error("IN ChatService -> updateAvatar(): {}", e.getMessage());
+            throw new AvatarNotExistsException("cannot save avatar", e);
+        }
+    }
+
+    @Override
+    public Avatar downloadAvatar(Long chatId) throws AvatarNotExistsException, ChatNotFoundException {
+        log.info("IN ChatService -> downloadAvatar()");
+        ChatEntity chat = findChatById(chatId, GROUP);
+        try {
+            String avatarPath = chat.getGroupChatOptions().getAvatar();
+            byte[] bytes = AvatarUtils.getImage(avatarPath);
+            MediaType type = AvatarUtils.getImageType(avatarPath);
+
+            return new Avatar(avatarPath, type, bytes);
+        } catch (IOException e) {
+            log.error("IN ChatService -> downloadAvatar(): {}", e.getMessage());
+            throw new AvatarNotExistsException(format("avatar for chat:%d was not found", chatId), e);
+        }
+    }
+
 }

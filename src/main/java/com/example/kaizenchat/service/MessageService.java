@@ -17,6 +17,8 @@ public interface MessageService {
     void editMessage(Long senderId, Long messageId, String body)
             throws UserNotFoundException, MessageNotFoundException, UserViolationPermissionsException;
 
+    public void deleteMessageById(Long messageId, Long userId)
+            throws MessageNotFoundException, UserViolationPermissionsException;
     List<MessageEntity> getLastMessages(Long chatId, ZonedDateTime time, int limit);
 
     List<MessageEntity> getLastMessages(Long chatId, int limit);
