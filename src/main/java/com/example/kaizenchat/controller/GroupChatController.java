@@ -59,7 +59,7 @@ public class GroupChatController {
 
 
     @Transactional
-    @MessageMapping("/join")
+    @MessageMapping("/group-chats/join")
     public OutgoingMessage joinIntoChat(AddMemberToChatRequest request, Authentication auth) {
         var userDetails = (UserDetailsImpl) auth.getPrincipal();
         log.info("GroupChatController ->  joinIntoChat(): user-id={} chat-id={}", userDetails.getId(), request.getChatId());
@@ -86,7 +86,7 @@ public class GroupChatController {
     }
 
     @Transactional
-    @MessageMapping("/quit/{id}")
+    @MessageMapping("/group-chats/quit/{id}")
     public OutgoingMessage quitFromChat(@DestinationVariable long id, Authentication auth) {
         var userDetails = (UserDetailsImpl) auth.getPrincipal();
         Long userId = userDetails.getId();
@@ -115,7 +115,7 @@ public class GroupChatController {
     }
 
     @Transactional
-    @MessageMapping("/send")
+    @MessageMapping("/group-chats/send")
     public OutgoingMessage receiveMessage(@Payload IncomingMessage message, Authentication auth) {
         var userDetails = (UserDetailsImpl) auth.getPrincipal();
         Long chatId = message.getChatId();
@@ -139,6 +139,73 @@ public class GroupChatController {
     @MessageExceptionHandler(RuntimeException.class)
     public void handleExceptions(RuntimeException e) {
         log.error("EXCEPTION: {}", e.getMessage());
+    }
+
+    @Transactional
+    @MessageMapping("/group-chats/edit")
+    public void editMessage(@Payload EditMessageRequest request, Authentication auth)
+            throws UserNotFoundException, UserViolationPermissionsException {
+        var userDetails = (UserDetailsImpl) auth.getPrincipal();
+        Long userId = userDetails.getId();
+        log.info("GroupChatController ->  editMessage(): user-id={}", userId);
+        try {
+            MessageEntity message = messageService.findMessageById(request.getMessageId())
+                    .orElseThrow(MessageNotFoundException::new);
+            messageService.editMessage(userId, request.getMessageId(), request.getBody());
+            OutgoingMessage outgoingMessage = OutgoingMessage.builder()
+                    .action(EDIT)
+                    .chatId(message.getChat().getId())
+                    .body(request.getBody())
+                    .messageId(message.getId())
+                    .build();
+            template.convertAndSend("/chatroom/" + message.getChat().getId(), outgoingMessage);
+        }catch(MessageNotFoundException e){
+            log.error("GroupChatController ->  editMessage(): {}", e.getMessage());
+        }
+    }
+
+    @Transactional
+    @MessageMapping("/group-chats/delete/{messageId}")
+    public void deleteMessage(@DestinationVariable Long messageId, Authentication auth) {
+        var userDetails = (UserDetailsImpl) auth.getPrincipal();
+        Long userId = userDetails.getId();
+        try {
+            MessageEntity message = messageService.findMessageById(messageId).orElseThrow(MessageNotFoundException::new);
+            UserEntity user = userService.findUserById(userId);
+            if(userId.equals(message.getSender().getId())||chatService.isUserAdminInGroupChat(user,message.getChat())){
+                messageService.deleteMessageById(messageId, userId);
+                OutgoingMessage outgoingMessage = OutgoingMessage.builder()
+                        .action(DELETE)
+                        .chatId(message.getChat().getId())
+                        .messageId(messageId)
+                        .build();
+                template.convertAndSend("/chatroom/" + message.getChat().getId(), outgoingMessage);
+            }
+        } catch (MessageNotFoundException | UserNotFoundException | UserViolationPermissionsException e) {
+            log.error("GroupChatController ->  deleteMessage(): {}", e.getMessage());
+        }
+    }
+
+    @Transactional
+    @MessageMapping("/group-chats/kick")
+    public void kickMember(@Payload KickMemberRequest request, Authentication auth){
+        var userDetails = (UserDetailsImpl) auth.getPrincipal();
+        Long userId = userDetails.getId();
+        try {
+            UserEntity admin = userService.findUserById(userId);
+            UserEntity user = userService.findUserById(request.getUserId());
+            ChatEntity chat = chatService.findChatById(request.getChatId(), GROUP);
+            chatService.kickFromGroupChat(admin, chat, user);
+            OutgoingMessage outgoingMessage = OutgoingMessage.builder()
+                    .action(QUIT)
+                    .chatId(request.getChatId())
+                    .senderId(request.getUserId())
+                    .body("user was kicked by "+ admin.getNickname())
+                    .build();
+            template.convertAndSend("/chatroom/" + request.getChatId(), outgoingMessage);
+        }catch (UserNotFoundException | UserViolationPermissionsException | ChatNotFoundException e) {
+            log.error("GroupChatController ->  deleteMessage(): {}", e.getMessage());
+        }
     }
 
     @GetMapping("/all")

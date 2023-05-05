@@ -6,9 +6,7 @@
 
 ---
 
-<br/>
-
-- ## REST
+# ***<p style="text-align: center;">REST</p>***
 
 ## Registration
 
@@ -426,301 +424,6 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 
 ---
 
-## Group chats
-
-<details>
-
-**Path:** `http://localhost:8080/user/group-chats/all`
-
-**Method:** GET
-
-**Authorization header format:** `Bearer [access token]`
-
-**Responses:**
-
-- 200:
-
-```json
-[
-  {
-    "id": 5,
-    "userId": 2,
-    "username": "bie3",
-    "lastMessage": "yooo",
-    "lastMessageTime": "2023-04-28T14:20:26.983+03:00"
-  },
-  {
-    "id": 4,
-    "userId": 2,
-    "username": "bie3",
-    "lastMessage": "hello world",
-    "lastMessageTime": "2023-04-25T10:42:09.449007+03:00"
-  }
-]
-```
-
-- 403:
-
-```json
-{
-  "message": "user is not found"
-}
-```
-
-<br/>
-
-**Path:** `http://localhost:8080/user/group-chats/{chatId}/avatar`
-
-**Method:** GET
-
-**Authorization header format:** `Bearer [access token]`
-
-**Responses:**
-
-- 200:
-
-```
-[image]
-```
-
-- 404:
-
-```json
-{
-    "path": "/user/group-chats/4/avatar",
-    "message": "GROUP-chat:4 was not found",
-    "statusCode": 404,
-    "timestamp": "2023-05-03T19:05:42.0903724+03:00"
-}
-```
-
-<br/>
-
-**Path:** `http://localhost:8080/user/group-chats/{chatId}/upload-avatar`
-
-**Method:** POST
-
-**Format:** form-data
-
-**Body:**
-
-```
-key: "avatar"
-value: image (jpeg, jpg, png, up to 3 megabytes)
-```
-
-**Responses:**
-
-- 200:
-
-```json
-{
-  "message": "updated"
-}
-```
-
-- 400:
-
-```json
-{
-    "path": "/user/group-chats/4/upload-avatar",
-    "message": "Current request is not a multipart request",
-    "statusCode": 400,
-    "timestamp": "2023-05-03T19:14:39.1494308+03:00"
-}
-```
-
-- 403:
-
-```json
-{
-    "path": "/user/group-chats/1/upload-avatar",
-    "message": "Maximum upload size exceeded",
-    "statusCode": 403,
-    "timestamp": "2023-05-03T19:20:05.9171878+03:00"
-}
-```
-
-```json
-{
-    "path": "/user/group-chats/1/upload-avatar",
-    "message": "uploaded file is not an image",
-    "statusCode": 403,
-    "timestamp": "2023-05-03T19:26:05.9963992+03:00"
-}
-```
-
-- 404:
-
-```json
-{
-    "path": "/user/group-chats/4/upload-avatar",
-    "message": "GROUP-chat:4 was not found",
-    "statusCode": 404,
-    "timestamp": "2023-05-03T19:19:09.0560148+03:00"
-}
-```
-
-</details>
-
-<br/>
-
-- ## Web Sockets
-
-## Connection
-
-<details>
-
-**Path:** `http://localhost:8080/ws-open`
-
-**Description:** this end-point establishes real-time connection between client and server. For that purpose client must use SockJS and StompJS client.
-
-When Stomp client is created over web-socket he has to connect to the server with such header:
-`Authorization: bearer (jwt)`. When successfully connected (via switching protocols) to the server, client can subscribe on channels and send messages as he needs.
-
-</details>
-
----
-
-## Subscription
-
-<details>
-
-**Path:** `/user/{user-id}/start`
-
-**WS Client:** StompJS
-
-**Headers:** `Authorization: bearer (jwt)`
-
-**Description:** this end-point is used to obtain information about new duo chats.
-
----
-
-**Path:** `/duo-chat/{chat-id}`
-
-**WS Client:** StompJS
-
-**Headers:** `Authorization: bearer (jwt)`
-
-**Description:** this end-point is used to subscribe only on duo chats.
-
----
-
-**Path:** `/chatroom/{chat-id}`
-
-**WS Client:** StompJS
-
-**Headers:** `Authorization: bearer (jwt)`
-
-**Description:** this end-point is used to subscribe only on group chats.
-
-</details>
-
----
-
-## Group chats
-
-<details>
-
-### Join to chat
-
-**Path:** `/app/join`
-
-**WS Client:** StompJS
-
-**Body format:** JSON
-
-**Headers:** `Authorization: bearer (jwt)`
-
-**Body:**
-
-```json
-{
-  "chatId": 1,
-  "privacyMode": true,
-  "password": "password, if privacy mode is true"
-}
-```
-
-**Responses:**
-
-- Status: `MESSAGE`
-
-```json
-{
-  "action": "JOIN",
-  "body": "bie3 joined to the chat",
-  "chatId": 4,
-  "senderId": 2,
-  "senderNickname": "bie3",
-  "timeStamp": "2023-04-25T10:36:34.2459185+03:00"
-}
-```
-
----
-
-### Quit from chat
-
-**Path:** `/app/quit/{chat-id}`
-
-**WS Client:** StompJS
-
-**Headers:** `Authorization: bearer (jwt)`
-
-
-**Responses:**
-
-- Status: `MESSAGE`
-
-```json
-{
-  "action": "QUIT",
-  "body": "bie3 left the chat",
-  "chatId": 4,
-  "senderId": 2,
-  "senderNickname": "bie3",
-  "timeStamp": "2023-04-25T10:36:34.2459185+03:00"
-}
-```
-
----
-
-### Send message to chat
-
-**Path:** `/app/send`
-
-**WS Client:** StompJS
-
-**Body format:** JSON
-
-**Headers:** `Authorization: bearer (jwt)`
-
-**Body:**
-
-```json
-{
-  "chatId": 4,
-  "body": "hello world"
-}
-```
-
-**Responses:**
-
-- Status: `MESSAGE`
-
-```json
-{
-  "action": "SEND",
-  "body": "hello world",
-  "chatId": 4,
-  "senderId": 2,
-  "senderNickname": "bie3",
-  "timeStamp": "2023-04-25T10:42:09.4639461+03:00"
-}
-```
-
-</details>
-
 ## Duo chats
 
 <details>
@@ -971,6 +674,7 @@ Time can be null
   "statusCode": 404,
   "timestamp": "2023-05-02T11:53:49.8606015+03:00"
 }
+
 ```
 
 - 404:
@@ -982,16 +686,439 @@ Time can be null
   "statusCode": 404,
   "timestamp": "2023-05-02T11:58:58.4126182+03:00"
 }
+
+```
+
+</details>
+
+</details>
+
+---
+
+## Group chats
+
+<details>
+
+**Path:** `http://localhost:8080/user/group-chats/all`
+
+**Method:** GET
+
+**Authorization header format:** `Bearer [access token]`
+
+**Responses:**
+
+- 200:
+
+```json
+[
+  {
+    "id": 5,
+    "userId": 2,
+    "username": "bie3",
+    "lastMessage": "yooo",
+    "lastMessageTime": "2023-04-28T14:20:26.983+03:00"
+  },
+  {
+    "id": 4,
+    "userId": 2,
+    "username": "bie3",
+    "lastMessage": "hello world",
+    "lastMessageTime": "2023-04-25T10:42:09.449007+03:00"
+  }
+]
+```
+
+- 403:
+
+```json
+{
+  "message": "user is not found"
+}
+```
+
+<br/>
+
+**Path:** `http://localhost:8080/user/group-chats/{chatId}/avatar`
+
+**Method:** GET
+
+**Authorization header format:** `Bearer [access token]`
+
+**Responses:**
+
+- 200:
+
+```
+[image]
+```
+
+- 404:
+
+```json
+{
+    "path": "/user/group-chats/4/avatar",
+    "message": "GROUP-chat:4 was not found",
+    "statusCode": 404,
+    "timestamp": "2023-05-03T19:05:42.0903724+03:00"
+}
+```
+
+<br/>
+
+**Path:** `http://localhost:8080/user/group-chats/{chatId}/upload-avatar`
+
+**Method:** POST
+
+**Format:** form-data
+
+**Body:**
+
+```
+key: "avatar"
+value: image (jpeg, jpg, png, up to 3 megabytes)
+```
+
+**Responses:**
+
+- 200:
+
+```json
+{
+  "message": "updated"
+}
+```
+
+- 400:
+
+```json
+{
+    "path": "/user/group-chats/4/upload-avatar",
+    "message": "Current request is not a multipart request",
+    "statusCode": 400,
+    "timestamp": "2023-05-03T19:14:39.1494308+03:00"
+}
+```
+
+- 403:
+
+```json
+{
+    "path": "/user/group-chats/1/upload-avatar",
+    "message": "Maximum upload size exceeded",
+    "statusCode": 403,
+    "timestamp": "2023-05-03T19:20:05.9171878+03:00"
+}
+```
+
+```json
+{
+    "path": "/user/group-chats/1/upload-avatar",
+    "message": "uploaded file is not an image",
+    "statusCode": 403,
+    "timestamp": "2023-05-03T19:26:05.9963992+03:00"
+}
+```
+
+- 404:
+
+```json
+{
+    "path": "/user/group-chats/4/upload-avatar",
+    "message": "GROUP-chat:4 was not found",
+    "statusCode": 404,
+    "timestamp": "2023-05-03T19:19:09.0560148+03:00"
+}
 ```
 
 </details>
 
 ---
 
+# ***<p style="text-align: center;">Web sockets</p>***
+
+## Connection
+
+<details>
+
+**Path:** `http://localhost:8080/ws-open`
+
+**Description:** this end-point establishes real-time connection between client and server. For that purpose client must use SockJS and StompJS client.
+
+When Stomp client is created over web-socket he has to connect to the server with such header:
+`Authorization: bearer (jwt)`. When successfully connected (via switching protocols) to the server, client can subscribe on channels and send messages as he needs.
+
+</details>
+
+---
+
+## Subscription
+
+<details>
+
+**Path:** `/user/{user-id}/start`
+
+**WS Client:** StompJS
+
+**Headers:** `Authorization: bearer (jwt)`
+
+**Description:** this end-point is used to obtain information about new duo chats.
+
+---
+
+**Path:** `/duo-chat/{chat-id}`
+
+**WS Client:** StompJS
+
+**Headers:** `Authorization: bearer (jwt)`
+
+**Description:** this end-point is used to subscribe only on duo chats.
+
+---
+
+**Path:** `/chatroom/{chat-id}`
+
+**WS Client:** StompJS
+
+**Headers:** `Authorization: bearer (jwt)`
+
+**Description:** this end-point is used to subscribe only on group chats.
+
+</details>
+
+---
+
+## Group chats
+
+<details>
+
+### Join to chat
+
+<details>
+
+**Path:** `/app/group-chats/join`
+
+**WS Client:** StompJS
+
+**Body format:** JSON
+
+**Headers:** `Authorization: bearer (jwt)`
+
+**Body:**
+
+```json
+{
+  "chatId": 1,
+  "privacyMode": true,
+  "password": "password, if privacy mode is true"
+}
+```
+
+**Responses:**
+
+- Status: `MESSAGE`
+
+```json
+{
+  "action": "JOIN",
+  "body": "bie3 joined to the chat",
+  "chatId": 4,
+  "senderId": 2,
+  "senderNickname": "bie3",
+  "timeStamp": "2023-04-25T10:36:34.2459185+03:00"
+}
+```
+
+</details>
+
+---
+
+### Quit from chat
+
+<details>
+
+**Path:** `/app/group-chats/quit/{chat-id}`
+
+**WS Client:** StompJS
+
+**Headers:** `Authorization: bearer (jwt)`
+
+
+**Responses:**
+
+- Status: `MESSAGE`
+
+```json
+{
+  "action": "QUIT",
+  "body": "bie3 left the chat",
+  "chatId": 4,
+  "senderId": 2,
+  "senderNickname": "bie3",
+  "timeStamp": "2023-04-25T10:36:34.2459185+03:00"
+}
+```
+
+</details>
+
+---
+
+### Send message to chat
+
+<details>
+
+**Path:** `/app/group-chats/send`
+
+**WS Client:** StompJS
+
+**Body format:** JSON
+
+**Headers:** `Authorization: bearer (jwt)`
+
+**Body:**
+
+```json
+{
+  "chatId": 4,
+  "body": "hello world"
+}
+```
+
+**Responses:**
+
+- Status: `MESSAGE`
+
+```json
+{
+  "action": "SEND",
+  "body": "hello world",
+  "chatId": 4,
+  "senderId": 2,
+  "senderNickname": "bie3",
+  "timeStamp": "2023-04-25T10:42:09.4639461+03:00"
+}
+```
+
+</details>
+
+---
+
+### Edit message
+
+<details>
+
+**Path:** `/app/group-chats/edit`
+
+**WS Client:** StompJS
+
+**Body format:** JSON
+
+**Headers:** `Authorization: bearer (jwt)`
+
+**Body:**
+
+```json
+{
+  "messageId": 4,
+  "body": "edited text"
+}
+```
+
+**Responses:**
+
+- Status: `MESSAGE`
+
+```json
+{
+  "action": "EDIT",
+  "chatId": 4,
+  "body": "hello world",
+  "messageId": 10
+}
+```
+
+</details>
+
+---
+
+### Delete message
+
+<details>
+
+**Path:** `/app/group-chats/delete/{messageId}`
+
+**WS Client:** StompJS
+
+**Body format:** JSON
+
+**Headers:** `Authorization: bearer (jwt)`
+
+**Responses:**
+
+- Status: `MESSAGE`
+
+```json
+{
+  "action": "DELETE",
+  "chatId": 4,
+  "messageId": 10
+}
+```
+
+</details>
+
+---
+
+### Kick member from group chat
+
+<details>
+
+**Path:** `/app/group-chats/kick`
+
+**WS Client:** StompJS
+
+**Body format:** JSON
+
+**Headers:** `Authorization: bearer (jwt)`
+
+**Body:**
+
+```json
+{
+  "chatId": 4,
+  "userId": 2
+}
+```
+
+**Responses:**
+
+- Status: `MESSAGE`
+
+```json
+{
+  "action": "QUIT",
+  "chatId": 4,
+  "senderId": 2,
+  "body": "user was kicked by adminNickname"
+}
+```
+
+senderId is an id of kicked member!
+
+</details>
+
+</details>
+
+---
+
+## Duo chats
+
+<details>
+
 ### Send message
 
 <details>
-**Path:** `/duo-chat/send`
+
+**Path:** `/app/duo-chat/send`
 
 **WS Client:** StompJS
 
@@ -1027,7 +1154,7 @@ Time can be null
 ### Edit message
 
 <details>
-**Path:** `/duo-chat/edit`
+**Path:** `/app/duo-chat/edit`
 
 **WS Client:** StompJS
 
@@ -1062,7 +1189,7 @@ Time can be null
 ### Delete message
 
 <details>
-**Path:** `/duo-chat/delete/{messageId}`
+**Path:** `/app/duo-chat/delete/{messageId}`
 
 **WS Client:** StompJS
 
