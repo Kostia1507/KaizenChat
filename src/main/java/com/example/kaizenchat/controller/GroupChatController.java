@@ -59,7 +59,7 @@ public class GroupChatController {
 
 
     @Transactional
-    @MessageMapping("/join")
+    @MessageMapping("/group-chats/join")
     public OutgoingMessage joinIntoChat(AddMemberToChatRequest request, Authentication auth) {
         var userDetails = (UserDetailsImpl) auth.getPrincipal();
         log.info("GroupChatController ->  joinIntoChat(): user-id={} chat-id={}", userDetails.getId(), request.getChatId());
@@ -86,7 +86,7 @@ public class GroupChatController {
     }
 
     @Transactional
-    @MessageMapping("/quit/{id}")
+    @MessageMapping("/group-chats/quit/{id}")
     public OutgoingMessage quitFromChat(@DestinationVariable long id, Authentication auth) {
         var userDetails = (UserDetailsImpl) auth.getPrincipal();
         Long userId = userDetails.getId();
@@ -115,7 +115,7 @@ public class GroupChatController {
     }
 
     @Transactional
-    @MessageMapping("/send")
+    @MessageMapping("/group-chats/send")
     public OutgoingMessage receiveMessage(@Payload IncomingMessage message, Authentication auth) {
         var userDetails = (UserDetailsImpl) auth.getPrincipal();
         Long chatId = message.getChatId();
@@ -142,7 +142,7 @@ public class GroupChatController {
     }
 
     @Transactional
-    @MessageMapping("/edit")
+    @MessageMapping("/group-chats/edit")
     public void editMessage(@Payload EditMessageRequest request, Authentication auth)
             throws UserNotFoundException, UserViolationPermissionsException {
         var userDetails = (UserDetailsImpl) auth.getPrincipal();
@@ -165,7 +165,7 @@ public class GroupChatController {
     }
 
     @Transactional
-    @MessageMapping("/delete/{messageId}")
+    @MessageMapping("/group-chats/delete/{messageId}")
     public void deleteMessage(@DestinationVariable Long messageId, Authentication auth) {
         var userDetails = (UserDetailsImpl) auth.getPrincipal();
         Long userId = userDetails.getId();
@@ -187,7 +187,7 @@ public class GroupChatController {
     }
 
     @Transactional
-    @MessageMapping("/kick")
+    @MessageMapping("/group-chats/kick")
     public void kickMember(@Payload KickMemberRequest request, Authentication auth){
         var userDetails = (UserDetailsImpl) auth.getPrincipal();
         Long userId = userDetails.getId();
