@@ -45,13 +45,6 @@ public class UserController {
         return of("user", user);
     }
 
-    @ResponseStatus(NO_CONTENT)
-    @GetMapping("/exists/{phoneNumber}")
-    public void checkPhoneNumberExistence(@PathVariable String phoneNumber) throws UserNotFoundException {
-        log.info("IN UserController -> checkPhoneNumberExistence(): {}", phoneNumber);
-        userService.findUserByPhoneNumber(phoneNumber);
-    }
-
     @ResponseStatus(OK)
     @GetMapping("/id/{userId}")
     public Map<String, UserEntity> getUserById(@PathVariable Long userId)

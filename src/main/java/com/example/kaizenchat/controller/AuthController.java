@@ -4,6 +4,7 @@ import com.example.kaizenchat.dto.RefreshTokenRequest;
 import com.example.kaizenchat.dto.UserLoginRequest;
 import com.example.kaizenchat.dto.UserRegistrationRequest;
 import com.example.kaizenchat.exception.InvalidRequestDataException;
+import com.example.kaizenchat.exception.UserNotFoundException;
 import com.example.kaizenchat.service.UserService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -16,8 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static java.time.ZonedDateTime.now;
-import static org.springframework.http.HttpStatus.FORBIDDEN;
-import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.*;
 
 @Slf4j
 @RestController
@@ -57,5 +57,12 @@ public class AuthController {
 
         log.info("IN AuthController -> refresh(): {}", now());
         return userService.refreshTokens(request.getOldRefreshToken());
+    }
+
+    @ResponseStatus(NO_CONTENT)
+    @GetMapping("/exists/{phoneNumber}")
+    public void checkPhoneNumberExistence(@PathVariable String phoneNumber) throws UserNotFoundException {
+        log.info("IN UserController -> checkPhoneNumberExistence(): {}", phoneNumber);
+        userService.findUserByPhoneNumber(phoneNumber);
     }
 }
