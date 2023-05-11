@@ -28,6 +28,29 @@
 }
 ```
 
+### Check if the number exists
+
+**Path:** `http://localhost:8080/user/exists/{phoneNumber}`
+
+**Method:** GET
+
+**Authorization header format:** `Bearer [access token]`
+
+**Responses:**
+
+- 204: no content
+
+- 404:
+
+```json
+{
+  "path": "/auth/exists/+380500000004",
+  "message": "user with phone-number:[+380500000004] not found",
+  "statusCode": 404,
+  "timestamp": "2023-05-02T21:23:00.8985278+03:00"
+}
+```
+
 **Responses:**
 
 - 200:
@@ -195,14 +218,11 @@
 
 ```json
 {
-  "user": {
-    "id": 3,
-    "phoneNumber": "...",
-    "nickname": "...",
-    "avatar": "...",
-    "bio": null,
-    "registration": "2023-04-21T21:23:54.455804+03:00"
-  }
+  "id": 3,
+  "phoneNumber": "...",
+  "nickname": "...",
+  "bio": null,
+  "registration": "2023-05-05T01:09:56.077+03:00"
 }
 ```
 
@@ -228,14 +248,11 @@
 
 ```json
 {
-  "user": {
-    "id": 3,
-    "phoneNumber": "...",
-    "nickname": "...",
-    "avatar": "...",
-    "bio": null,
-    "registration": "2023-04-21T21:23:54.455804+03:00"
-  }
+  "id": 3,
+  "phoneNumber": "...",
+  "nickname": "...",
+  "bio": null,
+  "registration": "2023-05-05T01:09:56.077+03:00"
 }
 ```
 
@@ -250,27 +267,6 @@
 }
 ```
 <br/>
-
-**Path:** `http://localhost:8080/user/exists/{phoneNumber}`
-
-**Method:** GET
-
-**Authorization header format:** `Bearer [access token]`
-
-**Responses:**
-
-- 204: no content
-
-- 404:
-
-```json
-{
-  "path": "/user/exists/+380500000004",
-  "message": "user with phone-number:[+380500000004] not found",
-  "statusCode": 404,
-  "timestamp": "2023-05-02T21:23:00.8985278+03:00"
-}
-```
 
 <br/>
 

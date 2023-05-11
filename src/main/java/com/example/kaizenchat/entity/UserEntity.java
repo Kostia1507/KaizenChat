@@ -32,6 +32,7 @@ public class UserEntity {
 
     private String nickname;
 
+    @JsonIgnore
     private String avatar;
 
     private String bio;
