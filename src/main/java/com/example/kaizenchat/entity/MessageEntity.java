@@ -1,6 +1,7 @@
 package com.example.kaizenchat.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,7 +24,7 @@ public class MessageEntity {
     @JoinColumn(name = "chat_id")
     private ChatEntity chat;
 
-    @JsonIgnore
+    @JsonIgnoreProperties(value = {"avatar", "registration", "bio"})
     @ManyToOne
     @JoinColumn(name = "user_id")
     private UserEntity sender;
