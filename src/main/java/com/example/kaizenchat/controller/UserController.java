@@ -37,22 +37,20 @@ public class UserController {
 
     @ResponseStatus(OK)
     @GetMapping("/phone/{phoneNumber}")
-    public Map<String, UserEntity> getUserByPhoneNumber(@PathVariable String phoneNumber)
+    public UserEntity getUserByPhoneNumber(@PathVariable String phoneNumber)
             throws UserNotFoundException {
 
         log.info("IN UserController -> getUserByPhoneNumber(): {}", phoneNumber);
-        UserEntity user = userService.findUserByPhoneNumber(phoneNumber);
-        return of("user", user);
+        return userService.findUserByPhoneNumber(phoneNumber);
     }
 
     @ResponseStatus(OK)
     @GetMapping("/id/{userId}")
-    public Map<String, UserEntity> getUserById(@PathVariable Long userId)
+    public UserEntity getUserById(@PathVariable Long userId)
             throws UserNotFoundException {
 
         log.info("IN UserController -> getUserById(): {}", userId);
-        UserEntity user = userService.findUserById(userId);
-        return of("user", user);
+        return userService.findUserById(userId);
     }
 
     @ResponseStatus(OK)
