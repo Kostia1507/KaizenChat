@@ -208,9 +208,37 @@
 
 <details>
 
+**Path:** `http://localhost:8080/user`
+
+**Method:** GET
+
+**Authorization header format:** `Bearer [access token]`
+
+**Responses:**
+
+- 200:
+
+```json
+{
+  "id": 3
+}
+```
+
+- 403:
+
+```json
+{
+  "message": "Invalid token"
+}
+```
+
+---
+
 **Path:** `http://localhost:8080/user/id/{id}`
 
 **Method:** GET
+
+**Authorization header format:** `Bearer [access token]`
 
 **Responses:**
 
@@ -241,6 +269,8 @@
 **Path:** `http://localhost:8080/user/phone/{phoneNumber}`
 
 **Method:** GET
+
+**Authorization header format:** `Bearer [access token]`
 
 **Responses:**
 
@@ -273,6 +303,8 @@
 **Path:** `http://localhost:8080/user/update`
 
 **Method:** POST
+
+**Authorization header format:** `Bearer [access token]`
 
 **Format:** JSON
 
@@ -320,6 +352,8 @@
 **Path:** `http://localhost:8080/user/upload-avatar`
 
 **Method:** POST
+
+**Authorization header format:** `Bearer [access token]`
 
 **Format:** form-data
 
@@ -397,6 +431,8 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 
 **Method:** GET
 
+**Authorization header format:** `Bearer [access token]`
+
 **Format:** form-data
 
 **Body:**
@@ -432,6 +468,8 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 
 **Method:** GET
 
+**Authorization header format:** `Bearer [access token]`
+
 **Responses:**
 
 - 200:
@@ -464,6 +502,8 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 **Path:** `http://localhost:8080/user/duo-chats/all`
 
 **Method:** GET
+
+**Authorization header format:** `Bearer [access token]`
 
 **Responses:**
 
@@ -501,6 +541,8 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 **Path:** `http://localhost:8080/user/duo-chats/{chatId}`
 
 **Method:** GET
+
+**Authorization header format:** `Bearer [access token]`
 
 **Responses:**
 
@@ -557,6 +599,8 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 **Path:** `http://localhost:8080/user/duo-chats/with/{userId}`
 
 **Method:** GET
+
+**Authorization header format:** `Bearer [access token]`
 
 **Responses:**
 
@@ -615,6 +659,8 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 **Path:** `localhost:8080/user/duo-chats/messages`
 
 **Method:** POST
+
+**Authorization header format:** `Bearer [access token]`
 
 **Format:** JSON
 
