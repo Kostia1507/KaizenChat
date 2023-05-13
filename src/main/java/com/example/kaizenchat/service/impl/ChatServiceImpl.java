@@ -31,6 +31,7 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -203,29 +204,37 @@ public class ChatServiceImpl implements ChatService {
 
         Set<ChatEntity> chats = type.equals(GROUP) ? user.getGroupChats() : user.getDuoChats();
         return chats.stream()
-                .map(this::getChatWithLastMessage)
+                .map(chat -> getChatWithLastMessage(chat, userId))
                 .filter(chat -> chat.getLastMessage() != null)
                 .sorted(comparing(Chat::getLastMessageTime).reversed())
                 .toList();
     }
 
-    private Chat getChatWithLastMessage(ChatEntity chat) {
+    private Chat getChatWithLastMessage(ChatEntity chat, Long userId) {
         Set<MessageEntity> lastMessages = chat.getMessages();
         log.info("IN ChatService -> getChatWithLastMessage(): chat-id={} list size={}", chat.getId(), lastMessages.size());
 
         if (lastMessages.isEmpty()) {
-            return new Chat(chat.getId(), null, null, null, null);
+            return new Chat(chat.getId(), null, null, null, null, null);
         }
 
         MessageEntity lastMessage = lastMessages.stream()
                 .max(comparing(MessageEntity::getTime))
                 .orElse(new MessageEntity());
 
-        UserEntity sender = lastMessage.getSender();
+        // userId is used only we retrieve duo-chats in order to determine
+        // receiver to which user with userId writes to. In any other cases, userId can be null
+        UserEntity user = chat.isGroupChat() ? lastMessage.getSender() :
+                chat.getUsers().stream()
+                        .filter(userEntity -> !Objects.equals(userEntity.getId(), userId))
+                        .findAny()
+                        .get();
+
         return new Chat(
                 chat.getId(),
-                sender.getId(),
-                sender.getNickname(),
+                chat.isGroupChat() ? chat.getName() : null,
+                user.getId(),
+                user.getNickname(),
                 lastMessage.getBody(),
                 lastMessage.getTime()
         );
