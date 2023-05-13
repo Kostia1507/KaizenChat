@@ -477,6 +477,7 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 [
   {
     "id": 1,
+    "name": null,
     "userId": 1,
     "username": "...",
     "lastMessage": "...",
@@ -484,6 +485,7 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
   },
   {
     "id": 2,
+    "name": null,
     "userId": 1,
     "username": "...",
     "lastMessage": "...",
@@ -713,6 +715,7 @@ Time can be null
 [
   {
     "id": 5,
+    "name": "Home",
     "userId": 2,
     "username": "bie3",
     "lastMessage": "yooo",
@@ -720,6 +723,7 @@ Time can be null
   },
   {
     "id": 4,
+    "name": "Party",
     "userId": 2,
     "username": "bie3",
     "lastMessage": "hello world",
