@@ -36,6 +36,17 @@ public class UserController {
     }
 
     @ResponseStatus(OK)
+    @GetMapping
+    public Map<String, Long> getIdByAccessToken() {
+        var userDetails = (UserDetailsImpl) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        return of("id", userDetails.getId());
+    }
+
+    @ResponseStatus(OK)
     @GetMapping("/phone/{phoneNumber}")
     public UserEntity getUserByPhoneNumber(@PathVariable String phoneNumber)
             throws UserNotFoundException {
