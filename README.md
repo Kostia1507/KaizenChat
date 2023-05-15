@@ -792,6 +792,18 @@ Time can be null
 
 **Authorization header format:** `Bearer [access token]`
 
+**Body:**
+
+```json
+{
+  "name": "Test 3 group chats",
+  "privacyMode": true,
+  "password": "r299d"
+}
+```
+
+Password can be null if privacy mode is false
+
 **Responses:**
 
 - 200:
