@@ -28,7 +28,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(@NonNull StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws-open")
+        registry.setErrorHandler(new CustomStompErrorHandler())
+                .addEndpoint("/ws-open")
                 .setAllowedOriginPatterns("*")
                 .withSockJS();
     }
