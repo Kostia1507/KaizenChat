@@ -45,6 +45,8 @@ import static java.util.Comparator.comparing;
 @Service
 public class ChatServiceImpl implements ChatService {
 
+    private final static String DEFAULT_CHAT_AVATAR_PATH = "src\\main\\resources\\images\\chat_default_av.png";
+
     private final ChatRepository chatRepository;
     private final UserRepository userRepository;
     private final GroupChatOptionsRepository groupChatOptionsRepository;
@@ -130,7 +132,7 @@ public class ChatServiceImpl implements ChatService {
     public GroupChat createGroupChat(GroupChatCreationRequest request, Long userId)
             throws UserNotFoundException {
 
-        log.info("IN ChatService -> createGroupChat(): user-id:{}", userId);
+        log.info("IN ChatService -> createGroupChat(): user-id={}", userId);
         UserEntity creator = userService.findUserById(userId);
 
         ChatEntity chat = ChatEntity.builder()
@@ -140,6 +142,7 @@ public class ChatServiceImpl implements ChatService {
                 .build();
 
         chat = chatRepository.save(chat);
+        chatRepository.addUserToGroupChat(chat.getId(), creator.getId(), true);
 
         var groupChatOptions = GroupChatOptionsEntity.builder()
                 .membersCount(1)
@@ -147,6 +150,7 @@ public class ChatServiceImpl implements ChatService {
                 .isPrivate(request.isPrivacyMode())
                 .password(null)
                 .chatId(chat.getId())
+                .avatar(DEFAULT_CHAT_AVATAR_PATH)
                 .build();
 
         if (request.isPrivacyMode()) {
@@ -191,7 +195,7 @@ public class ChatServiceImpl implements ChatService {
             return false;
         }
         // save user to chat
-        chatRepository.addUserToGroupChat(chat.getId(), userId);
+        chatRepository.addUserToGroupChat(chat.getId(), userId, false);
         groupChatOptions.setMembersCount(membersCount + 1);
         groupChatOptionsRepository.save(groupChatOptions);
         return true;
@@ -215,7 +219,7 @@ public class ChatServiceImpl implements ChatService {
         log.info("IN ChatService -> getChatWithLastMessage(): chat-id={} list size={}", chat.getId(), lastMessages.size());
 
         if (lastMessages.isEmpty()) {
-            return new Chat(chat.getId(), null, null, null, null, null);
+            return Chat.builder().id(chat.getId()).build();
         }
 
         MessageEntity lastMessage = lastMessages.stream()
@@ -230,14 +234,15 @@ public class ChatServiceImpl implements ChatService {
                         .findAny()
                         .get();
 
-        return new Chat(
-                chat.getId(),
-                chat.isGroupChat() ? chat.getName() : null,
-                user.getId(),
-                user.getNickname(),
-                lastMessage.getBody(),
-                lastMessage.getTime()
-        );
+        return Chat.builder()
+                .id(chat.getId())
+                .name(chat.isGroupChat() ? chat.getName() : null)
+                .adminId(chat.isGroupChat() ? chatRepository.getAdminId(chat.getId()) : null)
+                .userId(user.getId())
+                .username(user.getNickname())
+                .lastMessage(lastMessage.getBody())
+                .lastMessageTime(lastMessage.getTime())
+                .build();
     }
 
     @Override
