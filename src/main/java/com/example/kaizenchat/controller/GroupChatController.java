@@ -6,6 +6,7 @@ import com.example.kaizenchat.entity.MessageEntity;
 import com.example.kaizenchat.entity.UserEntity;
 import com.example.kaizenchat.exception.*;
 import com.example.kaizenchat.model.Avatar;
+import com.example.kaizenchat.model.GroupChat;
 import com.example.kaizenchat.security.jwt.UserDetailsImpl;
 import com.example.kaizenchat.service.ChatService;
 import com.example.kaizenchat.service.MessageService;
@@ -210,9 +211,7 @@ public class GroupChatController {
 
     @GetMapping("/all")
     public ResponseEntity<?> getAllChats() {
-        var userDetails = (UserDetailsImpl) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
+        var userDetails = getUserDetails();
 
         Long userId = userDetails.getId();
         log.info("GroupChatController ->  getAllChats(): user-id={}", userId);
@@ -228,12 +227,27 @@ public class GroupChatController {
         }
     }
 
+    @ResponseStatus(OK)
+    @PostMapping("/new")
+    public Map<String, Object> createChat(@Valid @RequestBody GroupChatCreationRequest request)
+            throws InvalidRequestDataException, UserNotFoundException {
+
+        var userDetails = getUserDetails();
+        Long userId = userDetails.getId();
+        log.info("GroupChatController ->  createChat(): user-id={}", userId);
+
+        if (request.isPrivacyMode() && request.getPassword() == null) {
+            throw new InvalidRequestDataException("password is not defined");
+        }
+
+        GroupChat chat = chatService.createGroupChat(request, userId);
+        return chat.map();
+    }
+
     @PostMapping("/messages")
     public ResponseEntity<Map<String, Object>> getLastMessages(@Valid @RequestBody LastMessagesRequest request)
             throws ChatNotFoundException, UserNotFoundException, UserNotFoundInChatException {
-        var userDetails = (UserDetailsImpl) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
+        var userDetails = getUserDetails();
         Long userId = userDetails.getId();
         log.info("GroupChatController ->  getLastMessages(): user-id={}", userId);
 
@@ -260,10 +274,7 @@ public class GroupChatController {
 
         validate(file);
 
-        var userDetails = (UserDetailsImpl) SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getPrincipal();
+        var userDetails = getUserDetails();
 
         chatService.uploadAvatar(file, chatId, userDetails.getId());
         return of("message", "updated");
@@ -278,6 +289,12 @@ public class GroupChatController {
         return ResponseEntity.ok()
                 .contentType(avatar.contentType())
                 .body(avatar.bytes());
+    }
+
+    public UserDetailsImpl getUserDetails() {
+        return (UserDetailsImpl) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
     }
 
 }
