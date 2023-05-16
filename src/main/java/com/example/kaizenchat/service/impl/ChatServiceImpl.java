@@ -1,9 +1,6 @@
 package com.example.kaizenchat.service.impl;
 
-import com.example.kaizenchat.dto.AddMemberToChatRequest;
-import com.example.kaizenchat.dto.Chat;
-import com.example.kaizenchat.dto.DuoChatCreationRequest;
-import com.example.kaizenchat.dto.GroupChatCreationRequest;
+import com.example.kaizenchat.dto.*;
 import com.example.kaizenchat.entity.ChatEntity;
 import com.example.kaizenchat.entity.GroupChatOptionsEntity;
 import com.example.kaizenchat.entity.MessageEntity;
@@ -45,7 +42,7 @@ import static java.util.Comparator.comparing;
 @Service
 public class ChatServiceImpl implements ChatService {
 
-    private final static String DEFAULT_CHAT_AVATAR_PATH = "src\\main\\resources\\images\\chat_default_av.png";
+    private final static String DEFAULT_CHAT_AVATAR_PATH = "src\\main\\resources\\images\\chat_default_av.txt";
 
     private final ChatRepository chatRepository;
     private final UserRepository userRepository;
@@ -289,7 +286,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public void uploadAvatar(MultipartFile avatar, Long chatId, Long userId)
+    public void uploadAvatar(String encodedContent, Long chatId, Long userId)
             throws
             UserViolationPermissionsException, UserNotFoundException,
             ChatNotFoundException, AvatarNotExistsException {
@@ -304,16 +301,15 @@ public class ChatServiceImpl implements ChatService {
                 throw new UserViolationPermissionsException("only admin can change avatar");
             }
 
-            String filename = String.format("chat-img-%d_%d.%s",
-                    chatId, Instant.now().toEpochMilli(), getFileExtension(avatar));
-
+            String filename = String.format("chat-img-%d_%d.txt", chatId, Instant.now().toEpochMilli());
             Path destination = AvatarUtils.getImageDestination(filename);
-            avatar.transferTo(destination);
+            AvatarUtils.updateAvatar(destination, encodedContent);
 
             // save path to chat options
             GroupChatOptionsEntity chatOptions = chat.getGroupChatOptions();
             chatOptions.setAvatar(destination.toString());
             groupChatOptionsRepository.save(chatOptions);
+
         } catch (IOException e) {
             log.error("IN ChatService -> updateAvatar(): {}", e.getMessage());
             throw new AvatarNotExistsException("cannot save avatar", e);
@@ -321,15 +317,13 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public Avatar downloadAvatar(Long chatId) throws AvatarNotExistsException, ChatNotFoundException {
+    public AvatarDTO downloadAvatar(Long chatId) throws AvatarNotExistsException, ChatNotFoundException {
         log.info("IN ChatService -> downloadAvatar()");
         ChatEntity chat = findChatById(chatId, GROUP);
         try {
             String avatarPath = chat.getGroupChatOptions().getAvatar();
-            byte[] bytes = AvatarUtils.getImage(avatarPath);
-            MediaType type = AvatarUtils.getImageType(avatarPath);
-
-            return new Avatar(avatarPath, type, bytes);
+            String encodedContent = AvatarUtils.downloadAvatar(Path.of(avatarPath));
+            return new AvatarDTO(encodedContent);
         } catch (IOException e) {
             log.error("IN ChatService -> downloadAvatar(): {}", e.getMessage());
             throw new AvatarNotExistsException(format("avatar for chat:%d was not found", chatId), e);
