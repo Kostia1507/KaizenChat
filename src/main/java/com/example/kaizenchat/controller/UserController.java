@@ -1,5 +1,6 @@
 package com.example.kaizenchat.controller;
 
+import com.example.kaizenchat.dto.AvatarDTO;
 import com.example.kaizenchat.dto.UserUpdateRequest;
 import com.example.kaizenchat.entity.UserEntity;
 import com.example.kaizenchat.exception.AvatarNotExistsException;
@@ -76,40 +77,32 @@ public class UserController {
 
     @ResponseStatus(OK)
     @PostMapping("/upload-avatar")
-    public Map<String, String> uploadAvatar(@RequestParam("avatar") MultipartFile file)
+    public Map<String, String> uploadAvatar(@Valid @RequestBody AvatarDTO avatar)
             throws UserNotFoundException {
-
-        log.info("IN UserController -> uploadAvatar(): file-size={} bytes", file.getSize());
-
-        if (file.isEmpty()) {
-            throw new BadCredentialsException("file is not present");
-        } else if (isNotValidFileSize(file)) {
-            throw new BadCredentialsException("file size is greater than 3MB");
-        } else if (isNotValidFileType(file)) {
-            throw new BadCredentialsException("uploaded file is not an image");
-        }
 
         var userDetails = (UserDetailsImpl) SecurityContextHolder
                 .getContext()
                 .getAuthentication()
                 .getPrincipal();
 
-        boolean isUpdated = userService.updateAvatar(file, userDetails.getId());
+        Long userId = userDetails.getId();
+
+        log.info("IN UserController -> uploadAvatar(): userId={}", userId);
+
+        boolean isUpdated = userService.updateAvatar(userId, avatar.getEncodedContent());
         if (isUpdated) {
             return of("message", "updated");
         }
         throw new UserNotFoundException("user is not defined");
     }
 
+    @ResponseStatus(OK)
     @GetMapping("/{userId}/avatar")
-    public ResponseEntity<byte[]> downloadAvatar(@PathVariable long userId)
+    public AvatarDTO downloadAvatar(@PathVariable long userId)
             throws UserNotFoundException, AvatarNotExistsException {
 
         log.info("IN UserController -> downloadAvatar(): user-id={}", userId);
-        Avatar avatar = userService.downloadAvatar(userId);
-        return ResponseEntity.ok()
-                .contentType(avatar.contentType())
-                .body(avatar.bytes());
+        return userService.downloadAvatar(userId);
     }
 
 }
