@@ -265,30 +265,24 @@ public class GroupChatController {
 
     @ResponseStatus(OK)
     @PostMapping("/{chatId}/upload-avatar")
-    public Map<String, String> uploadAvatar(@RequestParam("avatar") MultipartFile file,
-                                            @PathVariable Long chatId)
+    public Map<String, String> uploadAvatar(@PathVariable Long chatId, @Valid @RequestBody AvatarDTO avatar)
             throws UserViolationPermissionsException, UserNotFoundException,
             ChatNotFoundException, AvatarNotExistsException {
 
-        log.info("IN GroupChatController -> uploadAvatar(): file-size={} bytes", file.getSize());
-
-        validate(file);
+        log.info("IN GroupChatController -> uploadAvatar(): chatId={}", chatId);
 
         var userDetails = getUserDetails();
-
-        chatService.uploadAvatar(file, chatId, userDetails.getId());
+        chatService.uploadAvatar(avatar.getEncodedContent(), chatId, userDetails.getId());
         return of("message", "updated");
     }
 
+    @ResponseStatus(OK)
     @GetMapping("/{chatId}/avatar")
-    public ResponseEntity<byte[]> downloadAvatar(@PathVariable Long chatId)
+    public AvatarDTO downloadAvatar(@PathVariable Long chatId)
             throws ChatNotFoundException, AvatarNotExistsException {
 
         log.info("IN GroupChatController -> downloadAvatar(): chat-id={}", chatId);
-        Avatar avatar = chatService.downloadAvatar(chatId);
-        return ResponseEntity.ok()
-                .contentType(avatar.contentType())
-                .body(avatar.bytes());
+        return chatService.downloadAvatar(chatId);
     }
 
     public UserDetailsImpl getUserDetails() {
