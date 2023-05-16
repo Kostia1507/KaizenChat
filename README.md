@@ -355,13 +355,14 @@
 
 **Authorization header format:** `Bearer [access token]`
 
-**Format:** form-data
+**Format:** JSON
 
 **Body:**
 
-```
-key: "avatar"
-value: image (jpeg, jpg, png, up to 3 megabytes)
+```json
+{
+  "encodedContent": "data:image/jpg;base64,..."
+}
 ```
 
 **Responses:**
@@ -378,50 +379,7 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 
 ```json
 {
-  "path": "/user/upload-avatar",
-  "message": "Current request is not a multipart request",
-  "statusCode": 400,
-  "timestamp": "2023-05-03T00:21:20.1633149+03:00"
-}
-```
-
-- 403:
-
-```json
-{
-  "path": "user/upload-avatar",
-  "message": "file is not present",
-  "statusCode": 403,
-  "timestamp": "2023-04-30T14:32:23.2791826+03:00"
-}
-```
-
-```json
-{
-  "path": "user/upload-avatar",
-  "message": "file size is greater than 3MB",
-  "statusCode": 403,
-  "timestamp": "2023-04-30T14:32:23.2791826+03:00"
-}
-```
-
-```json
-{
-  "path": "user/upload-avatar",
-  "message": "uploaded file is not an image",
-  "statusCode": 403,
-  "timestamp": "2023-04-30T14:32:23.2791826+03:00"
-}
-```
-
-- 404:
-
-```json
-{
-  "path": "user/upload-avatar",
-  "message": "user is not defined",
-  "statusCode": 404,
-  "timestamp": "2023-04-30T14:32:23.2791826+03:00"
+  "encodedContent": "should be not blank"
 }
 ```
 
@@ -433,24 +391,28 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 
 **Authorization header format:** `Bearer [access token]`
 
-**Format:** form-data
-
-**Body:**
-
-```
-key: "avatar"
-value: image (jpeg, jpg, png, up to 3 megabytes)
-```
+**Format:** JSON
 
 **Responses:**
 
 - 200:
 
 ```
-[image]
+{
+  "encodedContent": "data:image/jpg;base64,..."
+}
 ```
 
-- 404
+- 404:
+
+```json
+{
+    "path": "/user/555/avatar",
+    "message": "user with id:555 not found",
+    "statusCode": 404,
+    "timestamp": "2023-05-16T12:20:03.0091015+03:00"
+}
+```
 
 </details>
 
@@ -846,8 +808,10 @@ Password can be null if privacy mode is false
 
 - 200:
 
-```
-[image]
+```json
+{
+  "encodedContent": "data:image/jpg;base64,..."
+}
 ```
 
 - 404:
@@ -867,13 +831,14 @@ Password can be null if privacy mode is false
 
 **Method:** POST
 
-**Format:** form-data
+**Format:** JSON
 
 **Body:**
 
-```
-key: "avatar"
-value: image (jpeg, jpg, png, up to 3 megabytes)
+```json
+{
+  "encodedContent": "data:image/jpg;base64,..."
+}
 ```
 
 **Responses:**
@@ -890,10 +855,7 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 
 ```json
 {
-  "path": "/user/group-chats/4/upload-avatar",
-  "message": "Current request is not a multipart request",
-  "statusCode": 400,
-  "timestamp": "2023-05-03T19:14:39.1494308+03:00"
+  "encodedContent": "should be not blank"
 }
 ```
 
@@ -901,19 +863,10 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 
 ```json
 {
-  "path": "/user/group-chats/1/upload-avatar",
-  "message": "Maximum upload size exceeded",
+  "path": "/user/group-chats/5/upload-avatar",
+  "message": "only admin can change avatar",
   "statusCode": 403,
-  "timestamp": "2023-05-03T19:20:05.9171878+03:00"
-}
-```
-
-```json
-{
-  "path": "/user/group-chats/1/upload-avatar",
-  "message": "uploaded file is not an image",
-  "statusCode": 403,
-  "timestamp": "2023-05-03T19:26:05.9963992+03:00"
+  "timestamp": "2023-05-16T15:15:20.6786852+03:00"
 }
 ```
 
