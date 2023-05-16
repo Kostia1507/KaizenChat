@@ -1,5 +1,6 @@
 package com.example.kaizenchat.service;
 
+import com.example.kaizenchat.dto.AvatarDTO;
 import com.example.kaizenchat.dto.UserLoginRequest;
 import com.example.kaizenchat.dto.UserRegistrationRequest;
 import com.example.kaizenchat.entity.UserEntity;
@@ -25,8 +26,8 @@ public interface UserService {
 
     void updateUser(Long userId, String nickname, String avatar, String bio) throws UserNotFoundException;
 
-    boolean updateAvatar(MultipartFile avatar, Long userId);
+    boolean updateAvatar(Long userId, String encodedAvatar);
 
-    Avatar downloadAvatar(Long userId) throws AvatarNotExistsException, UserNotFoundException;
+    AvatarDTO downloadAvatar(Long userId) throws AvatarNotExistsException, UserNotFoundException;
 
 }

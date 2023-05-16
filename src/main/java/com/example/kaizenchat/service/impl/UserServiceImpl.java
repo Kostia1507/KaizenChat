@@ -1,5 +1,6 @@
 package com.example.kaizenchat.service.impl;
 
+import com.example.kaizenchat.dto.AvatarDTO;
 import com.example.kaizenchat.dto.UserLoginRequest;
 import com.example.kaizenchat.dto.UserRegistrationRequest;
 import com.example.kaizenchat.entity.RoleEntity;
@@ -40,7 +41,7 @@ import static java.lang.String.format;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private final static String DEFAULT_USER_AVATAR_PATH = "src\\main\\resources\\images\\user_default_av.png";
+    private final static String DEFAULT_USER_AVATAR_PATH = "src\\main\\resources\\images\\user_default_av.txt";
 
     private final JWTProvider jwtProvider;
 
@@ -143,16 +144,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean updateAvatar(MultipartFile avatar, Long userId) {
-        log.info("IN UserService -> updateAvatar()");
+    public boolean updateAvatar(Long userId, String encodedContent) {
+        log.info("IN UserService -> updateAvatar(): userId={}", userId);
 
-        String filename = String.format("img-%d_%d.%s",
-                userId, Instant.now().toEpochMilli(), getFileExtension(avatar));
-
+        String filename = String.format("img-%d_%d.txt", userId, Instant.now().toEpochMilli());
         Path destination = AvatarUtils.getImageDestination(filename);
 
         try {
-            avatar.transferTo(destination);
+            AvatarUtils.updateAvatar(destination, encodedContent);
             updateUser(userId, null, destination.toString(), null);
             return true;
         } catch (IOException | UserNotFoundException e) {
@@ -162,18 +161,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Avatar downloadAvatar(Long userId) throws UserNotFoundException, AvatarNotExistsException {
+    public AvatarDTO downloadAvatar(Long userId) throws UserNotFoundException, AvatarNotExistsException {
         log.info("IN UserService -> downloadAvatar()");
-        UserEntity user = findUserById(userId);
-        try {
-            String avatarPath = user.getAvatar();
-            byte[] bytes = AvatarUtils.getImage(avatarPath);
-            MediaType type = AvatarUtils.getImageType(avatarPath);
 
-            return new Avatar(avatarPath, type, bytes);
+        UserEntity user = findUserById(userId);
+        Path avatar = Path.of(user.getAvatar());
+
+        try {
+            return new AvatarDTO(AvatarUtils.downloadAvatar(avatar));
         } catch (IOException e) {
             log.error("IN UserService -> downloadAvatar(): {}", e.getMessage());
-            throw new AvatarNotExistsException(format("avatar for user:%d was not found", userId), e);
+            throw new AvatarNotExistsException(format("avatar for user=%d was not found", userId), e);
         }
     }
 
