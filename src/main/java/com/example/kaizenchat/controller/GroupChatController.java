@@ -5,7 +5,6 @@ import com.example.kaizenchat.entity.ChatEntity;
 import com.example.kaizenchat.entity.MessageEntity;
 import com.example.kaizenchat.entity.UserEntity;
 import com.example.kaizenchat.exception.*;
-import com.example.kaizenchat.model.Avatar;
 import com.example.kaizenchat.model.GroupChat;
 import com.example.kaizenchat.security.jwt.UserDetailsImpl;
 import com.example.kaizenchat.service.ChatService;
@@ -25,14 +24,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
 
 import static com.example.kaizenchat.dto.Action.*;
 import static com.example.kaizenchat.model.ChatType.GROUP;
-import static com.example.kaizenchat.utils.MultipartFileUtils.validate;
 import static java.lang.String.format;
 import static java.time.ZonedDateTime.now;
 import static java.util.Map.of;

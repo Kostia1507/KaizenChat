@@ -6,7 +6,6 @@ import com.example.kaizenchat.entity.GroupChatOptionsEntity;
 import com.example.kaizenchat.entity.MessageEntity;
 import com.example.kaizenchat.entity.UserEntity;
 import com.example.kaizenchat.exception.*;
-import com.example.kaizenchat.model.Avatar;
 import com.example.kaizenchat.model.ChatType;
 import com.example.kaizenchat.model.DuoChat;
 import com.example.kaizenchat.model.GroupChat;
@@ -18,10 +17,8 @@ import com.example.kaizenchat.service.UserService;
 import com.example.kaizenchat.utils.AvatarUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Path;

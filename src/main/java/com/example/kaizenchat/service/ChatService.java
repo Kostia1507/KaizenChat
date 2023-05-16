@@ -4,11 +4,9 @@ import com.example.kaizenchat.dto.*;
 import com.example.kaizenchat.entity.ChatEntity;
 import com.example.kaizenchat.entity.UserEntity;
 import com.example.kaizenchat.exception.*;
-import com.example.kaizenchat.model.Avatar;
 import com.example.kaizenchat.model.ChatType;
 import com.example.kaizenchat.model.DuoChat;
 import com.example.kaizenchat.model.GroupChat;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 

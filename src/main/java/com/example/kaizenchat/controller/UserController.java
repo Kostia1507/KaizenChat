@@ -5,22 +5,16 @@ import com.example.kaizenchat.dto.UserUpdateRequest;
 import com.example.kaizenchat.entity.UserEntity;
 import com.example.kaizenchat.exception.AvatarNotExistsException;
 import com.example.kaizenchat.exception.UserNotFoundException;
-import com.example.kaizenchat.model.Avatar;
 import com.example.kaizenchat.security.jwt.UserDetailsImpl;
 import com.example.kaizenchat.service.UserService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
-import static com.example.kaizenchat.utils.MultipartFileUtils.isNotValidFileSize;
-import static com.example.kaizenchat.utils.MultipartFileUtils.isNotValidFileType;
 import static java.util.Map.of;
 import static org.springframework.http.HttpStatus.*;
 

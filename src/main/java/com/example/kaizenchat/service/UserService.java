@@ -7,8 +7,6 @@ import com.example.kaizenchat.entity.UserEntity;
 import com.example.kaizenchat.exception.AvatarNotExistsException;
 import com.example.kaizenchat.exception.InvalidRequestDataException;
 import com.example.kaizenchat.exception.UserNotFoundException;
-import com.example.kaizenchat.model.Avatar;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 

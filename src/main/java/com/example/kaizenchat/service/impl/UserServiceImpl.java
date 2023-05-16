@@ -8,7 +8,6 @@ import com.example.kaizenchat.entity.UserEntity;
 import com.example.kaizenchat.exception.AvatarNotExistsException;
 import com.example.kaizenchat.exception.InvalidRequestDataException;
 import com.example.kaizenchat.exception.UserNotFoundException;
-import com.example.kaizenchat.model.Avatar;
 import com.example.kaizenchat.repository.RoleRepository;
 import com.example.kaizenchat.repository.UserRepository;
 import com.example.kaizenchat.security.jwt.JWTProvider;
@@ -16,15 +15,12 @@ import com.example.kaizenchat.service.UserService;
 import com.example.kaizenchat.utils.AvatarUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -34,7 +30,6 @@ import java.util.Set;
 
 import static com.example.kaizenchat.security.jwt.JWTType.ACCESS;
 import static com.example.kaizenchat.security.jwt.JWTType.REFRESH;
-import static com.example.kaizenchat.utils.MultipartFileUtils.getFileExtension;
 import static java.lang.String.format;
 
 @Slf4j
