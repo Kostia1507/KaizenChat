@@ -397,7 +397,7 @@
 
 - 200:
 
-```
+```json
 {
   "encodedContent": "data:image/jpg;base64,..."
 }
