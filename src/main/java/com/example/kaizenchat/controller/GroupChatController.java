@@ -5,7 +5,7 @@ import com.example.kaizenchat.entity.ChatEntity;
 import com.example.kaizenchat.entity.MessageEntity;
 import com.example.kaizenchat.entity.UserEntity;
 import com.example.kaizenchat.exception.*;
-import com.example.kaizenchat.model.Avatar;
+import com.example.kaizenchat.model.GroupChat;
 import com.example.kaizenchat.security.jwt.UserDetailsImpl;
 import com.example.kaizenchat.service.ChatService;
 import com.example.kaizenchat.service.MessageService;
@@ -24,14 +24,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
 
 import static com.example.kaizenchat.dto.Action.*;
 import static com.example.kaizenchat.model.ChatType.GROUP;
-import static com.example.kaizenchat.utils.MultipartFileUtils.validate;
 import static java.lang.String.format;
 import static java.time.ZonedDateTime.now;
 import static java.util.Map.of;
@@ -210,9 +208,7 @@ public class GroupChatController {
 
     @GetMapping("/all")
     public ResponseEntity<?> getAllChats() {
-        var userDetails = (UserDetailsImpl) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
+        var userDetails = getUserDetails();
 
         Long userId = userDetails.getId();
         log.info("GroupChatController ->  getAllChats(): user-id={}", userId);
@@ -228,12 +224,27 @@ public class GroupChatController {
         }
     }
 
+    @ResponseStatus(OK)
+    @PostMapping("/new")
+    public Map<String, Object> createChat(@Valid @RequestBody GroupChatCreationRequest request)
+            throws InvalidRequestDataException, UserNotFoundException {
+
+        var userDetails = getUserDetails();
+        Long userId = userDetails.getId();
+        log.info("GroupChatController ->  createChat(): user-id={}", userId);
+
+        if (request.isPrivacyMode() && request.getPassword() == null) {
+            throw new InvalidRequestDataException("password is not defined");
+        }
+
+        GroupChat chat = chatService.createGroupChat(request, userId);
+        return chat.map();
+    }
+
     @PostMapping("/messages")
     public ResponseEntity<Map<String, Object>> getLastMessages(@Valid @RequestBody LastMessagesRequest request)
             throws ChatNotFoundException, UserNotFoundException, UserNotFoundInChatException {
-        var userDetails = (UserDetailsImpl) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
+        var userDetails = getUserDetails();
         Long userId = userDetails.getId();
         log.info("GroupChatController ->  getLastMessages(): user-id={}", userId);
 
@@ -251,33 +262,30 @@ public class GroupChatController {
 
     @ResponseStatus(OK)
     @PostMapping("/{chatId}/upload-avatar")
-    public Map<String, String> uploadAvatar(@RequestParam("avatar") MultipartFile file,
-                                            @PathVariable Long chatId)
+    public Map<String, String> uploadAvatar(@PathVariable Long chatId, @Valid @RequestBody AvatarDTO avatar)
             throws UserViolationPermissionsException, UserNotFoundException,
             ChatNotFoundException, AvatarNotExistsException {
 
-        log.info("IN GroupChatController -> uploadAvatar(): file-size={} bytes", file.getSize());
+        log.info("IN GroupChatController -> uploadAvatar(): chatId={}", chatId);
 
-        validate(file);
-
-        var userDetails = (UserDetailsImpl) SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getPrincipal();
-
-        chatService.uploadAvatar(file, chatId, userDetails.getId());
+        var userDetails = getUserDetails();
+        chatService.uploadAvatar(avatar.getEncodedContent(), chatId, userDetails.getId());
         return of("message", "updated");
     }
 
+    @ResponseStatus(OK)
     @GetMapping("/{chatId}/avatar")
-    public ResponseEntity<byte[]> downloadAvatar(@PathVariable Long chatId)
+    public AvatarDTO downloadAvatar(@PathVariable Long chatId)
             throws ChatNotFoundException, AvatarNotExistsException {
 
         log.info("IN GroupChatController -> downloadAvatar(): chat-id={}", chatId);
-        Avatar avatar = chatService.downloadAvatar(chatId);
-        return ResponseEntity.ok()
-                .contentType(avatar.contentType())
-                .body(avatar.bytes());
+        return chatService.downloadAvatar(chatId);
+    }
+
+    public UserDetailsImpl getUserDetails() {
+        return (UserDetailsImpl) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
     }
 
 }

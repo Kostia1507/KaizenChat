@@ -1,17 +1,12 @@
 package com.example.kaizenchat.service;
 
-import com.example.kaizenchat.dto.AddMemberToChatRequest;
-import com.example.kaizenchat.dto.Chat;
-import com.example.kaizenchat.dto.DuoChatCreationRequest;
-import com.example.kaizenchat.dto.GroupChatCreationRequest;
+import com.example.kaizenchat.dto.*;
 import com.example.kaizenchat.entity.ChatEntity;
 import com.example.kaizenchat.entity.UserEntity;
 import com.example.kaizenchat.exception.*;
-import com.example.kaizenchat.model.Avatar;
 import com.example.kaizenchat.model.ChatType;
 import com.example.kaizenchat.model.DuoChat;
 import com.example.kaizenchat.model.GroupChat;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -44,10 +39,10 @@ public interface ChatService {
 
     void deleteUser(ChatEntity chat, UserEntity user);
 
-    void uploadAvatar(MultipartFile avatar, Long chatId, Long userId)
+    void uploadAvatar(String encodedContent, Long chatId, Long userId)
             throws UserViolationPermissionsException, UserNotFoundException,
             ChatNotFoundException, AvatarNotExistsException;
 
-    Avatar downloadAvatar(Long chatId) throws AvatarNotExistsException, ChatNotFoundException;
+    AvatarDTO downloadAvatar(Long chatId) throws AvatarNotExistsException, ChatNotFoundException;
 
 }

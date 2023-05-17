@@ -208,9 +208,37 @@
 
 <details>
 
+**Path:** `http://localhost:8080/user`
+
+**Method:** GET
+
+**Authorization header format:** `Bearer [access token]`
+
+**Responses:**
+
+- 200:
+
+```json
+{
+  "id": 3
+}
+```
+
+- 403:
+
+```json
+{
+  "message": "Invalid token"
+}
+```
+
+---
+
 **Path:** `http://localhost:8080/user/id/{id}`
 
 **Method:** GET
+
+**Authorization header format:** `Bearer [access token]`
 
 **Responses:**
 
@@ -241,6 +269,8 @@
 **Path:** `http://localhost:8080/user/phone/{phoneNumber}`
 
 **Method:** GET
+
+**Authorization header format:** `Bearer [access token]`
 
 **Responses:**
 
@@ -273,6 +303,8 @@
 **Path:** `http://localhost:8080/user/update`
 
 **Method:** POST
+
+**Authorization header format:** `Bearer [access token]`
 
 **Format:** JSON
 
@@ -321,13 +353,16 @@
 
 **Method:** POST
 
-**Format:** form-data
+**Authorization header format:** `Bearer [access token]`
+
+**Format:** JSON
 
 **Body:**
 
-```
-key: "avatar"
-value: image (jpeg, jpg, png, up to 3 megabytes)
+```json
+{
+  "encodedContent": "data:image/jpg;base64,..."
+}
 ```
 
 **Responses:**
@@ -344,50 +379,7 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 
 ```json
 {
-  "path": "/user/upload-avatar",
-  "message": "Current request is not a multipart request",
-  "statusCode": 400,
-  "timestamp": "2023-05-03T00:21:20.1633149+03:00"
-}
-```
-
-- 403:
-
-```json
-{
-  "path": "user/upload-avatar",
-  "message": "file is not present",
-  "statusCode": 403,
-  "timestamp": "2023-04-30T14:32:23.2791826+03:00"
-}
-```
-
-```json
-{
-  "path": "user/upload-avatar",
-  "message": "file size is greater than 3MB",
-  "statusCode": 403,
-  "timestamp": "2023-04-30T14:32:23.2791826+03:00"
-}
-```
-
-```json
-{
-  "path": "user/upload-avatar",
-  "message": "uploaded file is not an image",
-  "statusCode": 403,
-  "timestamp": "2023-04-30T14:32:23.2791826+03:00"
-}
-```
-
-- 404:
-
-```json
-{
-  "path": "user/upload-avatar",
-  "message": "user is not defined",
-  "statusCode": 404,
-  "timestamp": "2023-04-30T14:32:23.2791826+03:00"
+  "encodedContent": "should be not blank"
 }
 ```
 
@@ -397,24 +389,30 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 
 **Method:** GET
 
-**Format:** form-data
+**Authorization header format:** `Bearer [access token]`
 
-**Body:**
-
-```
-key: "avatar"
-value: image (jpeg, jpg, png, up to 3 megabytes)
-```
+**Format:** JSON
 
 **Responses:**
 
 - 200:
 
-```
-[image]
+```json
+{
+  "encodedContent": "data:image/jpg;base64,..."
+}
 ```
 
-- 404
+- 404:
+
+```json
+{
+    "path": "/user/555/avatar",
+    "message": "user with id:555 not found",
+    "statusCode": 404,
+    "timestamp": "2023-05-16T12:20:03.0091015+03:00"
+}
+```
 
 </details>
 
@@ -431,6 +429,8 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 **Path:** `http://localhost:8080/user/duo-chats/start/{userId}`
 
 **Method:** GET
+
+**Authorization header format:** `Bearer [access token]`
 
 **Responses:**
 
@@ -465,6 +465,8 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 
 **Method:** GET
 
+**Authorization header format:** `Bearer [access token]`
+
 **Responses:**
 
 - 200:
@@ -494,13 +496,15 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 
 ---
 
-### Get chat by ID
+### Get duo-chat by ID
 
 <details>
 
 **Path:** `http://localhost:8080/user/duo-chats/{chatId}`
 
 **Method:** GET
+
+**Authorization header format:** `Bearer [access token]`
 
 **Responses:**
 
@@ -557,6 +561,8 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 **Path:** `http://localhost:8080/user/duo-chats/with/{userId}`
 
 **Method:** GET
+
+**Authorization header format:** `Bearer [access token]`
 
 **Responses:**
 
@@ -615,6 +621,8 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 **Path:** `localhost:8080/user/duo-chats/messages`
 
 **Method:** POST
+
+**Authorization header format:** `Bearer [access token]`
 
 **Format:** JSON
 
@@ -712,6 +720,7 @@ Time can be null
   {
     "id": 5,
     "name": "Home",
+    "adminId": 1,
     "userId": 2,
     "username": "bie3",
     "lastMessage": "yooo",
@@ -720,6 +729,7 @@ Time can be null
   {
     "id": 4,
     "name": "Party",
+    "adminId": 1,
     "userId": 2,
     "username": "bie3",
     "lastMessage": "hello world",
@@ -738,6 +748,56 @@ Time can be null
 
 <br/>
 
+**Path:** `http://localhost:8080/user/group-chats/new`
+
+**Method:** POST
+
+**Authorization header format:** `Bearer [access token]`
+
+**Body:**
+
+```json
+{
+  "name": "Test 3 group chats",
+  "privacyMode": true,
+  "password": "r299d"
+}
+```
+
+Password can be null if privacy mode is false
+
+**Responses:**
+
+- 200:
+
+```json
+{
+  "id": 6,
+  "name": "Test 3 group chats",
+  "membersCount": 1,
+  "membersLimit": 5000
+}
+```
+
+- 403:
+
+```json
+{
+    "name": "should be not blank"
+}
+```
+
+```json
+{
+    "path": "/user/group-chats/new",
+    "message": "password is not defined",
+    "statusCode": 403,
+    "timestamp": "2023-05-15T21:22:31.6380158+03:00"
+}
+```
+
+<br/>
+
 **Path:** `http://localhost:8080/user/group-chats/{chatId}/avatar`
 
 **Method:** GET
@@ -748,18 +808,20 @@ Time can be null
 
 - 200:
 
-```
-[image]
+```json
+{
+  "encodedContent": "data:image/jpg;base64,..."
+}
 ```
 
 - 404:
 
 ```json
 {
-    "path": "/user/group-chats/4/avatar",
-    "message": "GROUP-chat:4 was not found",
-    "statusCode": 404,
-    "timestamp": "2023-05-03T19:05:42.0903724+03:00"
+  "path": "/user/group-chats/4/avatar",
+  "message": "GROUP-chat:4 was not found",
+  "statusCode": 404,
+  "timestamp": "2023-05-03T19:05:42.0903724+03:00"
 }
 ```
 
@@ -769,13 +831,14 @@ Time can be null
 
 **Method:** POST
 
-**Format:** form-data
+**Format:** JSON
 
 **Body:**
 
-```
-key: "avatar"
-value: image (jpeg, jpg, png, up to 3 megabytes)
+```json
+{
+  "encodedContent": "data:image/jpg;base64,..."
+}
 ```
 
 **Responses:**
@@ -792,10 +855,7 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 
 ```json
 {
-    "path": "/user/group-chats/4/upload-avatar",
-    "message": "Current request is not a multipart request",
-    "statusCode": 400,
-    "timestamp": "2023-05-03T19:14:39.1494308+03:00"
+  "encodedContent": "should be not blank"
 }
 ```
 
@@ -803,19 +863,10 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 
 ```json
 {
-    "path": "/user/group-chats/1/upload-avatar",
-    "message": "Maximum upload size exceeded",
-    "statusCode": 403,
-    "timestamp": "2023-05-03T19:20:05.9171878+03:00"
-}
-```
-
-```json
-{
-    "path": "/user/group-chats/1/upload-avatar",
-    "message": "uploaded file is not an image",
-    "statusCode": 403,
-    "timestamp": "2023-05-03T19:26:05.9963992+03:00"
+  "path": "/user/group-chats/5/upload-avatar",
+  "message": "only admin can change avatar",
+  "statusCode": 403,
+  "timestamp": "2023-05-16T15:15:20.6786852+03:00"
 }
 ```
 
@@ -823,10 +874,10 @@ value: image (jpeg, jpg, png, up to 3 megabytes)
 
 ```json
 {
-    "path": "/user/group-chats/4/upload-avatar",
-    "message": "GROUP-chat:4 was not found",
-    "statusCode": 404,
-    "timestamp": "2023-05-03T19:19:09.0560148+03:00"
+  "path": "/user/group-chats/4/upload-avatar",
+  "message": "GROUP-chat:4 was not found",
+  "statusCode": 404,
+  "timestamp": "2023-05-03T19:19:09.0560148+03:00"
 }
 ```
 

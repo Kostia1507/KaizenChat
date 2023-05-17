@@ -55,11 +55,11 @@ public interface ChatRepository extends JpaRepository<ChatEntity, Long> {
     @Query(
             value = """
                     INSERT INTO group_chat_members (chat_id, user_id, is_admin)
-                    VALUES (:chatId, :userId, false);
+                    VALUES (:chatId, :userId, :isAdmin);
                     """,
             nativeQuery = true
     )
-    void addUserToGroupChat(Long chatId, Long userId);
+    void addUserToGroupChat(Long chatId, Long userId, boolean isAdmin);
 
     @Query(
             value = """
@@ -69,5 +69,15 @@ public interface ChatRepository extends JpaRepository<ChatEntity, Long> {
             nativeQuery = true
     )
     boolean isUserAdminInGroupChat(Long chatId, Long userId);
+
+    @Query(
+            value = """
+                    SELECT user_id FROM group_chat_members
+                    WHERE chat_id = :chatId AND is_admin = true
+                    LIMIT 1
+                    """,
+            nativeQuery = true
+    )
+    Long getAdminId(Long chatId);
 
 }

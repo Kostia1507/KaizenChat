@@ -4,7 +4,9 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Objects;
-public class MultipartFileUtils {
+
+@Deprecated
+public final class MultipartFileUtils {
 
     private static final long MAX_BYTES_SIZE = 3_000_000L; // 3MB
     private static final String PNG = "image/png";
